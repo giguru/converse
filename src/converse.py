@@ -9,13 +9,12 @@ logger = logging.getLogger(__name__)
 
 class Converse:
     """
-    Wrapper class derived from the Finder class from Haystack
+    Class derived from the Finder class from Haystack
     """
 
     def __init__(self,
                  reader: BaseReader,
                  retrievers: List[RetrieverPipelineStep],
-                 history_window: int = 2,
                  initial_questions: List[str] = [],
                  prepend_initial_question_to_retriever: bool = True,
                  prepend_initial_question_to_reader: bool = True
@@ -31,7 +30,6 @@ class Converse:
         self.__retrievers = retrievers
         self.__reader = reader
         self.__questions = initial_questions
-        self.__history_window = history_window
         self.__prepend_initial_question_to_retriever = prepend_initial_question_to_retriever
         self.__prepend_initial_question_to_reader = prepend_initial_question_to_reader
 

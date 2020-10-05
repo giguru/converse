@@ -4,7 +4,6 @@ from typing import List
 question_close_token = '<CLS>'  # From BERT without surrounding spaces
 question_separator_token = '<SEP>'  # From BERT without surrounding spaces
 
-
 def orconvqa_question_formatter(questions: List[str], prepend_initial_question: bool, history_window: int):
     """
     In the paper Open-retrieval Conversational Question Answering, the question string provided to
