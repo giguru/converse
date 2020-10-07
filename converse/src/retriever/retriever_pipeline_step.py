@@ -1,9 +1,9 @@
 from abc import ABC, abstractmethod
-from typing import Callable, List, final
+from typing import List
 from haystack import Document
 import logging
 
-from src.document_store.base import BaseDocumentStore
+from converse.src.document_store.base import BaseDocumentStore
 
 logger = logging.getLogger(__name__)
 

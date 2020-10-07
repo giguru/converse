@@ -23,7 +23,7 @@ from haystack import Document
 from haystack.document_store.base import BaseDocumentStore
 from haystack.reader.base import BaseReader
 
-from src.schema import PredictionResult
+from converse.src.schema import PredictionResult
 
 logger = logging.getLogger(__name__)
 

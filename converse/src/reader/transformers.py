@@ -5,7 +5,7 @@ from transformers import pipeline
 from haystack import Document
 from haystack.reader.base import BaseReader
 
-from src.schema import PredictionResult
+from converse.src.schema import PredictionResult
 
 
 class TransformersReader(BaseReader):

@@ -1,22 +1,13 @@
-import logging
-from abc import ABC
-from typing import Type, List, Union, Tuple, Optional
-import torch
+from typing import List, Union
 import numpy as np
-from pathlib import Path
 
 from farm.infer import Inferencer
 
 from haystack.document_store.base import BaseDocumentStore
 from haystack import Document
-from haystack.document_store.elasticsearch import ElasticsearchDocumentStore
-from haystack.retriever.base import BaseRetriever
 from haystack.retriever.sparse import logger
 
-from transformers.modeling_dpr import DPRContextEncoder, DPRQuestionEncoder
-from transformers.tokenization_dpr import DPRContextEncoderTokenizer, DPRQuestionEncoderTokenizer
-
-from src.retriever.retriever_pipeline_step import RetrieverPipelineStep
+from converse.src.retriever.retriever_pipeline_step import RetrieverPipelineStep
 
 
 class EmbeddingRetriever(RetrieverPipelineStep):

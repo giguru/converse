@@ -1,22 +1,17 @@
 import logging
-from typing import Type, List, Union, Tuple, Optional, Callable
+from typing import List, Union, Tuple, Optional
 import torch
 import numpy as np
-from pathlib import Path
-
-from farm.infer import Inferencer
 
 from haystack.document_store.base import BaseDocumentStore
 from haystack import Document
-from haystack.document_store.elasticsearch import ElasticsearchDocumentStore
-from haystack.retriever.base import BaseRetriever
 from haystack.retriever.sparse import logger
 
 from transformers.modeling_dpr import DPRContextEncoder, DPRQuestionEncoder
 from transformers.tokenization_dpr import DPRContextEncoderTokenizer, DPRQuestionEncoderTokenizer
 
-from src.retriever.pipeline_composition_error import PipelineCompositionError
-from src.retriever.retriever_pipeline_step import RetrieverPipelineStep
+from converse.src.retriever.pipeline_composition_error import PipelineCompositionError
+from converse.src.retriever.retriever_pipeline_step import RetrieverPipelineStep
 
 logger = logging.getLogger(__name__)
 
