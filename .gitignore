@@ -11,6 +11,9 @@
 .idea/**/usage.statistics.xml
 .idea/**/dictionaries
 .idea/**/shelf
+.idea/inspectionProfiles
+.idea/inspectionProfiles/*
+.idea/vcs.xml
 
 # Generated files
 .idea/**/contentModel.xml
@@ -86,3 +89,8 @@ modules.xml
 
 # Project exclude paths
 /venv/
+
+# Local run data
+examples/.ipynb_checkpoints/*
+examples/elasticsearch-7.6.2
+examples/mlruns
