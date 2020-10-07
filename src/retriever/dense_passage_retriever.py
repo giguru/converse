@@ -17,7 +17,6 @@ from transformers.tokenization_dpr import DPRContextEncoderTokenizer, DPRQuestio
 
 from src.retriever.pipeline_composition_error import PipelineCompositionError
 from src.retriever.retriever_pipeline_step import RetrieverPipelineStep
-from src.shared_default_functions import orconvqa_question_formatter
 
 logger = logging.getLogger(__name__)
 
@@ -34,8 +33,7 @@ class DensePassageRetriever(RetrieverPipelineStep):
                  query_embedding_model: str = "facebook/dpr-question_encoder-single-nq-base",
                  passage_embedding_model: str = "facebook/dpr-ctx_encoder-single-nq-base", max_seq_len: int = 256,
                  use_gpu: bool = True, batch_size: int = 16, embed_title: bool = True,
-                 remove_sep_tok_from_untitled_passages: bool = True,
-                 query_formatter: Callable = None
+                 remove_sep_tok_from_untitled_passages: bool = True
                  ):
         """
         Init the Retriever incl. the two encoder models from a local or remote model checkpoint.
@@ -57,7 +55,7 @@ class DensePassageRetriever(RetrieverPipelineStep):
         If this param is ``False`` => Embed passage as text pair with empty title (i.e. [CLS] [SEP] passage_tok1 ... [SEP])
         """
 
-        super().__init__(document_store, query_formatter=query_formatter)
+        super().__init__(document_store)
         self.document_store = document_store
         self.batch_size = batch_size
         self.max_seq_len = max_seq_len
@@ -84,10 +82,11 @@ class DensePassageRetriever(RetrieverPipelineStep):
         :param top_k:
         :return:
         """
-        return self.retrieve(self._apply_query_formatter(questions), filters=filters, top_k=top_k)
+        query = self._query_formatter(questions)
+        return self.retrieve(query, filters=filters, top_k=top_k)
 
     def follow_up_retrieve(self, questions: List[str], documents: List[Document], filters: dict = None, top_k: int = 10) -> List[Document]:
-        raise PipelineCompositionError('the Dense Passage Retriever was not designed to be used as a follow retriever')
+        raise PipelineCompositionError('the Dense Passage Retriever was taken from Haystack and was not designed to be used as a follow retriever')
 
     def retrieve(self, query: str, filters: dict = None, top_k: int = 10, index: str = None) -> List[Document]:
         if index is None:

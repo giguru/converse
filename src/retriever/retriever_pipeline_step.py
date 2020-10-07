@@ -15,17 +15,18 @@ class RetrieverPipelineStep(ABC):
     based on dense passage retrieval (passage reranker)
     """
     document_store: BaseDocumentStore
-    _query_formatter: Callable
 
-    def __init__(self, document_store: BaseDocumentStore, query_formatter: Callable = None, index: str = None):
+    def __init__(self, document_store: BaseDocumentStore, index: str = None):
         """
         :param document_store:
         :param query_formatter:
         :param index: The name of the index in the DocumentStore from which to retrieve documents
         """
         self.document_store = document_store
-        self._query_formatter = query_formatter
         self._index = index
+
+    def _query_formatter(self, questions: List[str]):
+        return questions[-1]  # By default only use the last string
 
     @abstractmethod
     def initial_retrieve(self, questions: List[str], filters: dict = None, top_k: int = 10) -> List[Document]:
@@ -49,20 +50,6 @@ class RetrieverPipelineStep(ABC):
         :param documents:
         :param top_k: How many documents to return per query.
         """
-
-    @final
-    def _apply_query_formatter(self, questions: List[str]) -> str:
-        """
-        Create query input for the retrieval.
-        :param questions:
-        :return:
-        """
-        if self._query_formatter is not None:
-            query = self._query_formatter(questions)
-        else:
-            # No question formatting, just take the last question.
-            query = questions[-1]
-        return query
 
     def eval(
             self,

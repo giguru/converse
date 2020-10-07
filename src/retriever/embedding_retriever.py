@@ -20,15 +20,8 @@ from src.retriever.retriever_pipeline_step import RetrieverPipelineStep
 
 
 class EmbeddingRetriever(RetrieverPipelineStep):
-    def __init__(
-        self,
-        document_store: BaseDocumentStore,
-        embedding_model: str,
-        use_gpu: bool = True,
-        model_format: str = "farm",
-        pooling_strategy: str = "reduce_mean",
-        emb_extraction_layer: int = -1,
-    ):
+    def __init__(self, document_store: BaseDocumentStore, embedding_model: str, use_gpu: bool = True,
+                 model_format: str = "farm", pooling_strategy: str = "reduce_mean", emb_extraction_layer: int = -1):
         """
         :param document_store: An instance of DocumentStore from which to retrieve documents.
         :param embedding_model: Local path or name of model in Hugging Face's model hub such as ``'deepset/sentence_bert'``
@@ -48,6 +41,7 @@ class EmbeddingRetriever(RetrieverPipelineStep):
         :param emb_extraction_layer: Number of layer from which the embeddings shall be extracted (for farm / transformers models only).
                                      Default: -1 (very last layer).
         """
+        super().__init__(document_store)
         self.document_store = document_store
         self.model_format = model_format
         self.embedding_model = embedding_model
