@@ -1,8 +1,13 @@
 from typing import List, Set, Dict, Tuple, Optional
 import logging
+import time
+from statistics import mean
+from collections import defaultdict
 from haystack.reader.base import BaseReader
 
-from src.retriever_pipeline_step import RetrieverPipelineStep
+from src.eval import eval_counts_reader, eval_counts_reader_batch, calculate_reader_metrics
+from src.retriever.retriever_pipeline_step import RetrieverPipelineStep
+from src.schema import MultiLabel
 
 logger = logging.getLogger(__name__)
 
@@ -78,14 +83,15 @@ class Converse:
     def restart_conversation(self):
         self.__questions = []
 
-    def eval(
-            self,
-            label_index: str,
-            doc_index: str,
-            label_origin: str = "gold_label",
-            top_k_retriever: int = 10,
-            top_k_reader: int = 10,
-    ):
+    def __check_both_elements(self):
+        if not self.__reader:
+            raise Exception(f"{type(self).__name__} needs to have a reader and retriever for the evaluation.")
+
+        if len(self.__retrievers) == 0:
+            raise Exception(f"{type(self).__name__} needs to have at least one retriever for the evaluation.")
+
+    def eval(self, label_index: str, doc_index: str, label_origin: str = "gold_label",
+            top_k_retriever: int = 10, top_k_reader: int = 10):
         """
         Evaluation of the whole pipeline by first evaluating the Retriever and then evaluating the Reader on the result
         of the Retriever.
@@ -130,9 +136,7 @@ class Converse:
         :param top_k_reader: How many answers to return per question
         :type top_k_reader: int
         """
-
-        if not self.reader or not self.retriever:
-            raise Exception("Finder needs to have a reader and retriever for the evaluation.")
+        self.__check_both_elements()
 
         finder_start_time = time.time()
         # extract all questions for evaluation
@@ -166,8 +170,8 @@ class Converse:
         retriever_total_time = time.time() - retriever_start_time
         counts["number_of_questions"] = q_idx + 1
 
-        previous_return_no_answers = self.reader.return_no_answers
-        self.reader.return_no_answers = True
+        previous_return_no_answers = self.__reader.return_no_answers
+        self.__reader.return_no_answers = True
 
         # extract answers
         reader_start_time = time.time()
@@ -179,7 +183,7 @@ class Converse:
             question_string = question.question
             docs = question_docs["docs"]  # type: ignore
             single_reader_start = time.time()
-            predicted_answers = self.reader.predict(question_string, docs, top_k=top_k_reader)  # type: ignore
+            predicted_answers = self.__reader.predict(question_string, docs, top_k=top_k_reader)  # type: ignore
             read_times.append(time.time() - single_reader_start)
             counts = eval_counts_reader(question, predicted_answers, counts)
 
@@ -188,7 +192,7 @@ class Converse:
         reader_total_time = time.time() - reader_start_time
         finder_total_time = time.time() - finder_start_time
 
-        self.reader.return_no_answers = previous_return_no_answers  # type: ignore
+        self.__reader.return_no_answers = previous_return_no_answers
 
         logger.info(
             (f"{counts['correct_readings_topk']} out of {counts['number_of_questions']} questions were correctly"
@@ -264,9 +268,7 @@ class Converse:
         :param batch_size: Number of samples per batch computed at once
         :type batch_size: int
         """
-
-        if not self.reader or not self.retriever:
-            raise Exception("Finder needs to have a reader and retriever for the evalutaion.")
+        self.__check_both_elements()
 
         counts = defaultdict(float)  # type: Dict[str, float]
         finder_start_time = time.time()
@@ -285,10 +287,10 @@ class Converse:
         correct_retrievals = len(questions_with_correct_doc)
 
         # extract answers
-        previous_return_no_answers = self.reader.return_no_answers
-        self.reader.return_no_answers = True
+        previous_return_no_answers = self.__reader.return_no_answers
+        self.__reader.return_no_answers = True
         reader_start_time = time.time()
-        predictions = self.reader.predict_batch(questions_with_correct_doc,
+        predictions = self.__reader.predict_batch(questions_with_correct_doc,
                                                 top_k_per_question=top_k_reader, batch_size=batch_size)
         reader_total_time = time.time() - reader_start_time
 
@@ -318,6 +320,7 @@ class Converse:
         # Retrieves documents for a list of Labels (= questions)
         questions_with_docs = []
 
+        # TODO
         for question in questions:
             question_string = question.question
             retrieved_docs = self.retriever.retrieve(question_string, top_k=top_k, index=doc_index)  # type: ignore
