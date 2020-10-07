@@ -1,13 +1,13 @@
-from typing import List, Set, Dict, Tuple, Optional
+from typing import List, Dict, Optional
 import logging
 import time
 from statistics import mean
 from collections import defaultdict
 from haystack.reader.base import BaseReader
 
-from src.eval import eval_counts_reader, eval_counts_reader_batch, calculate_reader_metrics
-from src.retriever.retriever_pipeline_step import RetrieverPipelineStep
-from src.schema import MultiLabel
+from converse.src.eval import eval_counts_reader, eval_counts_reader_batch, calculate_reader_metrics
+from converse.src.retriever.retriever_pipeline_step import RetrieverPipelineStep
+from converse.src.schema import MultiLabel
 
 logger = logging.getLogger(__name__)
 
