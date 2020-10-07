@@ -23,6 +23,8 @@ from haystack import Document
 from haystack.document_store.base import BaseDocumentStore
 from haystack.reader.base import BaseReader
 
+from src.schema import PredictionResult
+
 logger = logging.getLogger(__name__)
 
 
@@ -321,8 +323,7 @@ class FARMReader(BaseReader):
         inputs = []
         for doc in documents:
             cur = QAInput(doc_text=doc.text,
-                          questions=Question(text=question,
-                                             uid=doc.id))
+                          questions=Question(text=question, uid=doc.id))
             inputs.append(cur)
 
         # get answers from QA model
@@ -331,11 +332,8 @@ class FARMReader(BaseReader):
         )
         # assemble answers from all the different documents & format them.
         answers, max_no_ans_gap = self._extract_answers_of_predictions(predictions, top_k)
-        result = {"question": question,
-                  "no_ans_gap": max_no_ans_gap,
-                  "answers": answers}
 
-        return result
+        return PredictionResult(question, answers, no_ans_gap=max_no_ans_gap)
 
     def eval_on_file(self, data_dir: str, test_filename: str, device: str):
         """

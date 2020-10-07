@@ -5,6 +5,8 @@ from transformers import pipeline
 from haystack import Document
 from haystack.reader.base import BaseReader
 
+from src.schema import PredictionResult
+
 
 class TransformersReader(BaseReader):
     """
@@ -139,16 +141,11 @@ class TransformersReader(BaseReader):
 
         if self.return_no_answers:
             answers.append(no_ans_prediction)
+
         # sort answers by their `probability` and select top-k
-        answers = sorted(
-            answers, key=lambda k: k["probability"], reverse=True
-        )
+        answers = sorted(answers, key=lambda k: k["probability"], reverse=True)
         answers = answers[:top_k]
-
-        results = {"question": question,
-                   "answers": answers}
-
-        return results
+        return PredictionResult(question=question, answers=answers)
 
     def predict_batch(self, question_doc_list: List[dict], top_k_per_question: Optional[int] = None,
                       batch_size: Optional[int] = None):

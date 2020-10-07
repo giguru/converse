@@ -43,7 +43,7 @@ class Document:
         self.embedding = embedding
 
     def to_dict(self, field_map={}):
-        inv_field_map = {v:k for k, v in field_map.items()}
+        inv_field_map = {v: k for k, v in field_map.items()}
         _doc: Dict[str, str] = {}
         for k, v in self.__dict__.items():
             k = k if k not in inv_field_map else inv_field_map[k]
@@ -70,6 +70,18 @@ class Document:
                 _new_doc[k] = v
 
         return cls(**_new_doc)
+
+
+class PredictionResult:
+    def __init__(self, question: str, answers: List[dict], no_ans_gap=None):
+        self.question = question
+        self.no_ans_gap = no_ans_gap
+        self.answers = answers
+
+    def __getitem__(self, key):
+        if hasattr(self, key) is False:
+            raise KeyError(f'Invalid key: {key}')
+        return self[key]
 
 
 class Label:
