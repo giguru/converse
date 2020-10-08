@@ -53,17 +53,7 @@ class Converse:
         self.__questions.append(question)
 
         # 1) Apply retrievers (with optional filters)
-        documents = None
-        for idx, retriever in enumerate(self.__retrievers):
-            if idx == 0:
-                documents = retriever.initial_retrieve(self.__questions, filters=filters, top_k=top_k_retriever)
-            else:  # follow up retrieval
-                documents = retriever.follow_up_retrieve(self.__questions, documents, filters=filters,
-                                                         top_k=top_k_retriever)
-
-            if len(documents) == 0:
-                logger.info(f"Retriever {idx} of class {type(retriever).__name__} did not return any documents. Stopping retrieval process...")
-                return {"question": question, "answers": []}  # empty result
+        documents = self.__go_through_retrievers(self.__questions, filters=filters, top_k_retriever=top_k_retriever)
 
         # 2) Apply reader to get granular answer(s)
         len_chars = sum([len(d.text) for d in documents])
@@ -79,6 +69,22 @@ class Converse:
                     ans["meta"] = doc.meta
 
         return results
+
+    def __go_through_retrievers(self, questions: List[str], filters: Optional[dict], top_k_retriever: int):
+        documents = None
+        for idx, retriever in enumerate(self.__retrievers):
+            if idx == 0:
+                documents = retriever.initial_retrieve(self.__questions, filters=filters, top_k=top_k_retriever)
+            else:  # follow up retrieval
+                documents = retriever.follow_up_retrieve(self.__questions, documents, filters=filters,
+                                                         top_k=top_k_retriever)
+
+            if len(documents) == 0:
+                logger.info(
+                    f"Retriever {idx} of class {type(retriever).__name__} did not return any documents. Stopping retrieval process...")
+                return {"question": questions[-1], "answers": []}  # empty result
+
+        return documents
 
     def restart_conversation(self):
         self.__questions = []
@@ -141,7 +147,12 @@ class Converse:
         finder_start_time = time.time()
         # extract all questions for evaluation
         filters = {"origin": [label_origin]}
-        questions = self.retriever.document_store.get_all_labels_aggregated(index=label_index, filters=filters)
+
+        # TODO here we take the document store of the first retriever. However, technically each retriever can have its
+        #  own/ a different document store. Maybe pass the document store as an argument to this method?
+        relevant_document_store = self.__retrievers[0].document_store
+
+        questions = relevant_document_store.get_all_labels_aggregated(index=label_index, filters=filters)
 
         counts = defaultdict(float)  # type: Dict[str, float]
         retrieve_times = []
@@ -153,7 +164,7 @@ class Converse:
         for q_idx, question in enumerate(questions):
             question_string = question.question
             single_retrieve_start = time.time()
-            retrieved_docs = self.retriever.retrieve(question_string, top_k=top_k_retriever, index=doc_index)
+            retrieved_docs = self.__go_through_retrievers([question_string], top_k_retriever=top_k_retriever, filters=filters)
             retrieve_times.append(time.time() - single_retrieve_start)
 
             # check if correct doc among retrieved docs

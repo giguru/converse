@@ -72,6 +72,7 @@ class DensePassageRetriever(RetrieverPipelineStep):
 
     def initial_retrieve(self, questions: List[str], filters: dict = None, top_k: int = 10) -> List[Document]:
         """
+        :param index:
         :param questions: Questions from the same conversation
         :param filters:
         :param top_k:
