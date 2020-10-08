@@ -81,7 +81,7 @@ class DensePassageRetriever(RetrieverPipelineStep):
         query = self._query_formatter(questions)
         return self.retrieve(query, filters=filters, top_k=top_k)
 
-    def follow_up_retrieve(self, questions: List[str], documents: List[Document], filters: dict = None, top_k: int = 10) -> List[Document]:
+    def follow_up_retrieve(self, questions: List[str], previous_documents: List[Document], filters: dict = None, top_k: int = 10) -> List[Document]:
         raise PipelineCompositionError('the Dense Passage Retriever was taken from Haystack and was not designed to be used as a follow retriever')
 
     def retrieve(self, query: str, filters: dict = None, top_k: int = 10, index: str = None) -> List[Document]:

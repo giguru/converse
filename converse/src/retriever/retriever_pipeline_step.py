@@ -26,6 +26,8 @@ class RetrieverPipelineStep(ABC):
         self._index = index
 
     def _query_formatter(self, questions: List[str]):
+        if len(questions) == 0:
+            raise ValueError('The list of questions should contain at least one question')
         return questions[-1]  # By default only use the last string
 
     @abstractmethod
@@ -41,13 +43,14 @@ class RetrieverPipelineStep(ABC):
         pass
 
     @abstractmethod
-    def follow_up_retrieve(self, questions: List[str], documents: List[Document], filters: dict = None, top_k: int = 10) -> List[Document]:
+    def follow_up_retrieve(self, questions: List[str], previous_documents: List[Document], filters: dict = None, top_k: int = 10) -> List[Document]:
         """
         After initial retrieval, you might want to add follow up retrieval steps, such as LTR or splitting the
         documents into passages.
 
-        :param questions:
-        :param documents:
+        :param questions: Converse is conversational, so these are all the questions in the conversation.
+            With the most recent one last in the list.
+        :param previous_documents: The documents returned by the previous retriever.
         :param top_k: How many documents to return per query.
         """
 

@@ -5,7 +5,8 @@ from statistics import mean
 from collections import defaultdict
 from haystack.reader.base import BaseReader
 
-from converse.src.eval import eval_counts_reader, eval_counts_reader_batch, calculate_reader_metrics
+from converse.src.eval import eval_counts_reader, eval_counts_reader_batch, calculate_reader_metrics, \
+    calculate_average_precision
 from converse.src.retriever.retriever_pipeline_step import RetrieverPipelineStep
 from converse.src.schema import MultiLabel, PredictionResult
 
@@ -146,7 +147,7 @@ class Converse:
 
         finder_start_time = time.time()
         # extract all questions for evaluation
-        filters = {"origin": [label_origin]}
+        filters = None # {"origin": [label_origin]} <- TODO This only applies to ElasticSearchDocumentStore
 
         # TODO here we take the document store of the first retriever. However, technically each retriever can have its
         #  own/ a different document store. Maybe pass the document store as an argument to this method?
@@ -162,6 +163,8 @@ class Converse:
         questions_with_docs = []
         retriever_start_time = time.time()
         for q_idx, question in enumerate(questions):
+            # TODO in order for converse to be conversational at evaluation, we need to add historical questions to
+            #  the question. Then the entire history of questions is provided to the retrievers.
             question_string = question.question
             single_retrieve_start = time.time()
             retrieved_docs = self.__go_through_retrievers([question_string], top_k_retriever=top_k_retriever, filters=filters)
@@ -172,10 +175,7 @@ class Converse:
                 if doc.id in question.multiple_document_ids:
                     counts["correct_retrievals"] += 1
                     counts["summed_avg_precision_retriever"] += 1 / (doc_idx + 1)
-                    questions_with_docs.append({
-                        "question": question,
-                        "docs": retrieved_docs
-                    })
+                    questions_with_docs.append({"question": question, "docs": retrieved_docs})
                     break
 
         retriever_total_time = time.time() - retriever_start_time
@@ -284,9 +284,14 @@ class Converse:
         counts = defaultdict(float)  # type: Dict[str, float]
         finder_start_time = time.time()
 
+        # TODO here we take the document store of the first retriever. However, technically each retriever can have its
+        #  own/ a different document store. Maybe pass the document store as an argument to this method?
+        relevant_document_store = self.__retrievers[0].document_store
+
         # extract all questions for evaluation
         filters = {"origin": [label_origin]}
-        questions = self.retriever.document_store.get_all_labels_aggregated(index=label_index, filters=filters)
+
+        questions = relevant_document_store.get_all_labels_aggregated(index=label_index, filters=filters)
         number_of_questions = len(questions)
 
         # retrieve documents
@@ -334,7 +339,7 @@ class Converse:
         # TODO
         for question in questions:
             question_string = question.question
-            retrieved_docs = self.retriever.retrieve(question_string, top_k=top_k, index=doc_index)  # type: ignore
+            retrieved_docs = self.__go_through_retrievers([question_string], top_k_retriever=top_k)  # type: ignore
             questions_with_docs.append({
                 "question": question,
                 "docs": retrieved_docs
