@@ -145,7 +145,7 @@ class Converse:
 
         finder_start_time = time.time()
         # extract all questions for evaluation
-        filters = {"origin": [label_origin]}
+        filters = None # {"origin": [label_origin]} <- TODO This only applies to ElasticSearchDocumentStore
 
         # TODO here we take the document store of the first retriever. However, technically each retriever can have its
         #  own/ a different document store. Maybe pass the document store as an argument to this method?
