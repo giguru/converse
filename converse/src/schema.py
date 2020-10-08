@@ -78,11 +78,6 @@ class PredictionResult:
         self.no_ans_gap = no_ans_gap
         self.answers = answers
 
-    def __getitem__(self, key):
-        if hasattr(self, key) is False:
-            raise KeyError(f'Invalid key: {key}')
-        return self[key]
-
 
 class Label:
     def __init__(self, question: str,
