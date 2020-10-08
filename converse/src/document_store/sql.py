@@ -1,3 +1,4 @@
+import logging
 from typing import Any, Dict, Union, List, Optional
 from uuid import uuid4
 
@@ -5,7 +6,7 @@ from sqlalchemy import create_engine, Column, Integer, String, DateTime, func, F
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
 
-from haystack.document_store.base import BaseDocumentStore
+from converse.src.document_store.base import BaseDocumentStore
 from haystack import Document, Label
 from haystack.preprocessor.utils import eval_data_from_file
 

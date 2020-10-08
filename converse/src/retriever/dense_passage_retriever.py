@@ -3,7 +3,7 @@ from typing import List, Union, Tuple, Optional
 import torch
 import numpy as np
 
-from haystack.document_store.base import BaseDocumentStore
+from converse.src.document_store.base import BaseDocumentStore
 from haystack import Document
 from haystack.retriever.sparse import logger
 
@@ -89,7 +89,7 @@ class DensePassageRetriever(RetrieverPipelineStep):
             # Use the document store default index
             index = self.document_store.index
         query_emb = self.embed_queries(texts=[query])
-        documents = self.document_store.query_by_embedding(query_emb=query_emb[0], top_k=top_k, filters=filters, index=index)
+        documents = self.document_store.query_by_embedding(query_emb=query_emb[0], top_k=top_k, index=index)
         return documents
 
     def embed_queries(self, texts: List[str]) -> List[np.array]:

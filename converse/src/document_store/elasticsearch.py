@@ -8,7 +8,7 @@ from elasticsearch.helpers import bulk, scan
 import numpy as np
 from scipy.special import expit
 
-from haystack.document_store.base import BaseDocumentStore
+from converse.src.document_store.base import BaseDocumentStore
 from haystack import Document, Label
 from haystack.preprocessor.utils import eval_data_from_file
 from haystack.retriever.base import BaseRetriever

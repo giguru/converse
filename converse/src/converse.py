@@ -74,9 +74,9 @@ class Converse:
         documents = None
         for idx, retriever in enumerate(self.__retrievers):
             if idx == 0:
-                documents = retriever.initial_retrieve(self.__questions, filters=filters, top_k=top_k_retriever)
+                documents = retriever.initial_retrieve(questions, filters=filters, top_k=top_k_retriever)
             else:  # follow up retrieval
-                documents = retriever.follow_up_retrieve(self.__questions, documents, filters=filters,
+                documents = retriever.follow_up_retrieve(questions, documents, filters=filters,
                                                          top_k=top_k_retriever)
 
             if len(documents) == 0:
@@ -96,7 +96,7 @@ class Converse:
         if len(self.__retrievers) == 0:
             raise Exception(f"{type(self).__name__} needs to have at least one retriever for the evaluation.")
 
-    def eval(self, label_index: str, doc_index: str, label_origin: str = "gold_label",
+    def eval(self,  doc_index: str = "eval_document", label_index: str = "label", label_origin: str = "gold_label",
             top_k_retriever: int = 10, top_k_reader: int = 10):
         """
         Evaluation of the whole pipeline by first evaluating the Retriever and then evaluating the Reader on the result
