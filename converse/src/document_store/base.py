@@ -44,6 +44,8 @@ class BaseDocumentStore(ABC):
         aggregated_labels = []
         all_labels = self.get_all_labels(index=index, filters=filters)
 
+        print(all_labels)
+
         # Collect all answers to a question in a dict
         question_ans_dict = {} # type: ignore
         for l in all_labels:
