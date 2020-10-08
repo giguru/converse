@@ -77,8 +77,7 @@ class Converse:
             if idx == 0:
                 documents = retriever.initial_retrieve(questions, filters=filters, top_k=top_k_retriever)
             else:  # follow up retrieval
-                documents = retriever.follow_up_retrieve(questions, documents, filters=filters,
-                                                         top_k=top_k_retriever)
+                documents = retriever.follow_up_retrieve(questions, documents, filters=filters, top_k=top_k_retriever)
 
             if len(documents) == 0:
                 logger.info(

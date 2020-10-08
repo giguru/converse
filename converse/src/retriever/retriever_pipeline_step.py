@@ -26,6 +26,8 @@ class RetrieverPipelineStep(ABC):
         self._index = index
 
     def _query_formatter(self, questions: List[str]):
+        if len(questions) == 0:
+            raise ValueError('The list of questions should contain at least one question')
         return questions[-1]  # By default only use the last string
 
     @abstractmethod
