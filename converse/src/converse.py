@@ -7,7 +7,7 @@ from haystack.reader.base import BaseReader
 
 from converse.src.eval import eval_counts_reader, eval_counts_reader_batch, calculate_reader_metrics
 from converse.src.retriever.retriever_pipeline_step import RetrieverPipelineStep
-from converse.src.schema import MultiLabel
+from converse.src.schema import MultiLabel, PredictionResult
 
 logger = logging.getLogger(__name__)
 
@@ -59,10 +59,10 @@ class Converse:
         len_chars = sum([len(d.text) for d in documents])
         logger.info(f"Reader is looking for detailed answer in {len_chars} chars ...")
 
-        results = self.__reader.predict(question=question, documents=documents, top_k=top_k_reader)  # type: Dict[str, Any]
+        results = self.__reader.predict(question=question, documents=documents, top_k=top_k_reader)  # type: PredictionResult
 
         # Add corresponding document_name and more meta data, if an answer contains the document_id
-        for ans in results["answers"]:
+        for ans in results.answers:
             ans["meta"] = {}
             for doc in documents:
                 if doc.id == ans["document_id"]:
