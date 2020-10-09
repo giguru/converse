@@ -1,7 +1,7 @@
 import logging
 from abc import abstractmethod, ABC
 from typing import Any, Optional, Dict, List, Union
-from haystack import Document, Label, MultiLabel
+from converse.src.schema import Document, Label, MultiLabel
 
 logger = logging.getLogger(__name__)
 
@@ -43,8 +43,6 @@ class BaseDocumentStore(ABC):
                                   filters: Optional[Dict[str, List[str]]] = None) -> List[MultiLabel]:
         aggregated_labels = []
         all_labels = self.get_all_labels(index=index, filters=filters)
-
-        print(all_labels)
 
         # Collect all answers to a question in a dict
         question_ans_dict = {} # type: ignore

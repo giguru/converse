@@ -163,11 +163,13 @@ class Converse:
         questions_with_docs = []
         retriever_start_time = time.time()
         for q_idx, question in enumerate(questions):
-            # TODO in order for converse to be conversational at evaluation, we need to add historical questions to
-            #  the question. Then the entire history of questions is provided to the retrievers.
-            question_string = question.question
             single_retrieve_start = time.time()
-            retrieved_docs = self.__go_through_retrievers([question_string], top_k_retriever=top_k_retriever, filters=filters)
+
+            question_string = question.question
+            if not isinstance(question_string, list):
+                question_string = [question_string]
+
+            retrieved_docs = self.__go_through_retrievers(question_string, top_k_retriever=top_k_retriever, filters=filters)
             retrieve_times.append(time.time() - single_retrieve_start)
 
             # check if correct doc among retrieved docs

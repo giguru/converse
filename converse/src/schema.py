@@ -88,7 +88,9 @@ class Label:
                  document_id: Optional[str] = None,
                  offset_start_in_doc: Optional[int] = None,
                  no_answer: Optional[bool] = None,
-                 model_id: Optional[int] = None):
+                 model_id: Optional[int] = None,
+                 previous_questions_in_conversation: Optional[List[str]] = None,
+         ):
         """
         Object used to represent label/feedback in a standardized way within Haystack.
         This includes labels from dataset like SQuAD, annotations from labeling tools,
@@ -105,6 +107,7 @@ class Label:
         :param offset_start_in_doc: the answer start offset in the document.
         :param no_answer: whether the question in unanswerable.
         :param model_id: model_id used for prediction (in-case of user feedback).
+        :param previous_questions_in_conversation: A question can be part of a conversation, the previous questions of the conversation can be added here
         """
         self.question = question
         self.answer = answer
@@ -115,6 +118,7 @@ class Label:
         self.offset_start_in_doc = offset_start_in_doc
         self.no_answer = no_answer
         self.model_id = model_id
+        self.previous_questions_in_conversation = previous_questions_in_conversation
 
     @classmethod
     def from_dict(cls, dict):

@@ -9,7 +9,7 @@ import numpy as np
 from scipy.special import expit
 
 from converse.src.document_store.base import BaseDocumentStore
-from haystack import Document, Label
+from converse.src.schema import Document, Label
 from haystack.preprocessor.utils import eval_data_from_file
 from haystack.retriever.base import BaseRetriever
 
