@@ -258,11 +258,12 @@ def orconvqa_build_corpus(filename: str) -> List[Document]:
 
 def orconvqa_read_files(filename: str, qrelsfile: str, buildCorpus: bool = False, corpusFile: str = ""):
     """
+    Read and combine files from the OR-Quac dataset
+
     :param filename - Name of json file containing the questions, qids, answers and the question history
     :param qrelsfile - File in json format linking the qids to the doc ids of the golden passage (the passage where the answer can be found)
     :param buildCorpus - Whether or not the corpus should be build while parsing the questions file (requires corpus file)
     :param corpusFile - If buildCorpus is set, the function will load the documents from the corpus file as using the buildCorpus function
-
 
     :return: (List of Labels, None|List of Documents)
     """
@@ -311,3 +312,43 @@ def orconvqa_read_files(filename: str, qrelsfile: str, buildCorpus: bool = False
             labels.append(label)
 
     return labels, docs
+
+
+def CoQA_read_file(filename: str) -> Tuple[List[Document], List[Label]]:
+    """
+    Read Documents + Labels from a CoQA style file
+    Document and Labels can then be indexed to the DocumentStore and be used for evaluation.
+
+    :param filename: Path to file in CoQA format
+    :return: (List of Documents, List of Labels)
+    """
+    docs = []
+    labels = []
+
+    with open(filename, "r") as file:
+        data = json.load(file)
+        for document in data["data"]:
+            # get all extra fields from document level (e.g. title)
+            meta_doc = {k: v for k, v in document.items() if k not in ("questions", "answers")}
+            cur_doc = Document(id=document['id'], text=document["story"], meta=meta_doc)
+
+            docs.append(cur_doc)
+            # Get Labels
+            for q, a in zip(document["questions"], document['answers']):
+
+                label = Label(
+                    question=q["input_text"],
+                    # TODO these are very short answers and may not allways match with the span_start
+                    # The retrieved answer on span_text is longer and input_text is taken from that
+                    answer=a['input_text'],
+                    is_correct_answer=True,
+                    is_correct_document=True,
+                    # We do not do an extra check if the document id exists in the corpus, this may cause issues later
+                    document_id=cur_doc.id,
+                    offset_start_in_doc=a["span_start"],
+                    origin=filename,
+                    previous_questions_in_conversation=[pq['input_text'] for pq in document['questions'] if pq['turn_id'] < q['turn_id']]
+                )
+                labels.append(label)
+
+    return docs, labels
