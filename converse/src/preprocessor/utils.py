@@ -6,12 +6,13 @@ import zipfile
 from pathlib import Path
 from typing import Callable, List, Optional, Tuple
 import json
+import os
 
 from farm.data_handler.utils import http_get
 
 from haystack.file_converter.pdf import PDFToTextConverter
 from haystack.file_converter.tika import TikaConverter
-from haystack import Document, Label
+from converse.src.schema import Document, Label
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +57,7 @@ def eval_data_from_file(filename: str) -> Tuple[List[Document], List[Label]]:
                                 offset_start_in_doc=answer["answer_start"],
                                 no_answer=qa["is_impossible"],
                                 origin="gold_label",
-                                )
+                            )
                             labels.append(label)
                     else:
                         label = Label(
@@ -73,7 +74,8 @@ def eval_data_from_file(filename: str) -> Tuple[List[Document], List[Label]]:
         return docs, labels
 
 
-def convert_files_to_dicts(dir_path: str, clean_func: Optional[Callable] = None, split_paragraphs: bool = False) -> List[dict]:
+def convert_files_to_dicts(dir_path: str, clean_func: Optional[Callable] = None, split_paragraphs: bool = False) -> \
+List[dict]:
     """
     Convert all files(.txt, .pdf) in the sub-directories of the given path to Python dicts that can be written to a
     Document Store.
@@ -167,7 +169,8 @@ def tika_convert_files_to_dicts(
                         # merge this paragraph if less than 10 characters or 2 words
                         # or this paragraph starts with a lower case and last paragraph does not end with a punctuation
                         if merge_short and len(para) < 10 or len(re.findall('\s+', para)) < 2 \
-                            or merge_lowercase and para and para[0].islower() and last_para and last_para[-1] not in '.?!"\'\]\)':
+                                or merge_lowercase and para and para[0].islower() and last_para and last_para[
+                            -1] not in '.?!"\'\]\)':
                             last_para += ' ' + para
                         else:
                             if last_para:
@@ -226,19 +229,84 @@ def fetch_archive_from_http(url: str, output_dir: str, proxies: Optional[dict] =
         return True
 
 
-def orconvqa_files_to_dicts(use_samples: bool = True):
+def orconvqa_build_corpus(filename: str) -> List[Document]:
     """
-    :param use_samples:
+        :param filename - Name of json file containing the text blocks, each line should be in json format and contain
+            at least a 'text' and 'id' entry
 
-    :return: (List of Documents, List of Labels)
+        :return: List of Documents
     """
 
     docs = []
+    with open(filename, 'r') as file:
+        for idx, block in enumerate(file.readlines()):
+            try:
+                block = json.loads(block)
+            except:
+                raise ValueError(f'Error occurred reading json block on line {idx} of file: {filename}')
+
+            cur_meta = {"name": block["title"]}
+            # all other fields on block level f.e. id, aid, bid
+            block_meta = {k: v for k, v in block.items() if k not in ['text', 'id']}
+            cur_meta.update(block_meta)
+
+            # Create Document
+            cur_doc = Document(id=block['id'], text=block["text"], meta=cur_meta)
+            docs.append(cur_doc)
+    return docs
+
+# TODO, this name doesnt realy make sense, should be load eval?
+def orconvqa_files_to_dicts(filename: str, qrelsfile: str, buildCorpus: bool = False, corpusFile: str = ""):
+    """
+    :param filename - Name of json file containing the questions, qids, answers and the question history
+    :param qrelsfile - File in json format linking the qids to the doc ids of the golden passage (the passage where the answer can be found)
+    :param buildCorpus - Whether or not the corpus should be build while parsing the questions file (requires corpus file)
+    :param corpusFile - If buildCorpus is set, the function will load the documents from the corpus file as using the buildCorpus function
+
+
+    :return: (List of Labels, None|List of Documents)
+    """
+
+    docs = None
+    if buildCorpus:
+        if not os.path.isfile(corpusFile):
+            raise ValueError('Could not find corpus file')
+        docs = orconvqa_build_corpus(corpusFile)
+
+    with open(qrelsfile, 'r') as f:
+        qrels = json.load(f)
+
     labels = []
 
-    if use_samples:
-        dir_path = '../../../datasets/predefined/orconvqa/samples/'
-    else:
-        raise NotImplementedError('Did not implement using the full data set yet')
+    with open(filename, "r") as file:
+        for question in file.readlines():
+            question = json.loads(question)
 
-    return docs, labels
+            try:
+                q_doc_rel = qrels[question['qid']]
+            except:
+                logger.warning(f'Qid {question["qid"]} not found in qrels, skipping question')
+
+            if len(q_doc_rel.keys()) > 1:
+                logger.warning('Found qrel with multiple docs, golden passage is unknown, assuming first')
+
+            bla = q_doc_rel.keys()
+
+            document_id = next(iter(q_doc_rel.keys()))
+
+            label = Label(
+                question=question["rewrite"],
+                original_question=question['question'],
+                answer=question["answer"]['text'],
+                is_correct_answer=True,
+                is_correct_document=True,
+                document_id=document_id,
+                offset_start_in_doc=question["answer"]['answer_start'],
+                no_answer=question["answer"]['text'] == 'CANNOTANSWER',
+                origin=filename,
+                # TODO we do have some extra data here in the preprossed file -> pq['answer'], ['answer_start'] and ['bid']
+                previous_questions_in_conversation=[pq['question'] for pq in question['history']]
+            )
+            labels.append(label)
+
+    return labels, docs

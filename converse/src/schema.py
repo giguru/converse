@@ -85,6 +85,7 @@ class Label:
                  is_correct_answer: bool,
                  is_correct_document: bool,
                  origin: str,
+                 original_question: Optional[str] = None,
                  document_id: Optional[str] = None,
                  offset_start_in_doc: Optional[int] = None,
                  no_answer: Optional[bool] = None,
@@ -103,6 +104,7 @@ class Label:
                                     incorrect answer but correct document & incorrect document. This flag denotes if
                                     the returned document was correct.
         :param origin: the source for the labels. It can be used to later for filtering.
+        :param original_question: The question in its original form - the question parameter may be a rewrite of the original
         :param document_id: the document_store's ID for the returned answer document.
         :param offset_start_in_doc: the answer start offset in the document.
         :param no_answer: whether the question in unanswerable.
@@ -114,6 +116,7 @@ class Label:
         self.is_correct_answer = is_correct_answer
         self.is_correct_document = is_correct_document
         self.origin = origin
+        self.original_question = original_question
         self.document_id = document_id
         self.offset_start_in_doc = offset_start_in_doc
         self.no_answer = no_answer
@@ -135,6 +138,7 @@ class Label:
                 getattr(other, 'is_correct_answer', None) == self.is_correct_answer and
                 getattr(other, 'is_correct_document', None) == self.is_correct_document and
                 getattr(other, 'origin', None) == self.origin and
+                getattr(other, 'original_question', None) == self.original_question and
                 getattr(other, 'document_id', None) == self.document_id and
                 getattr(other, 'offset_start_in_doc', None) == self.offset_start_in_doc and
                 getattr(other, 'no_answer', None) == self.no_answer and
@@ -146,6 +150,7 @@ class Label:
                     str(self.is_correct_answer) +
                     str(self.is_correct_document) +
                     str(self.origin) +
+                    str(self.original_question) +
                     str(self.document_id) +
                     str(self.offset_start_in_doc) +
                     str(self.no_answer) +
