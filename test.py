@@ -1,40 +1,30 @@
-from haystack.preprocessor.cleaning import clean_wiki_text
-from haystack.preprocessor.utils import convert_files_to_dicts, fetch_archive_from_http
-from haystack.reader.farm import FARMReader
-from haystack.reader.transformers import TransformersReader
-from haystack.utils import print_answers
-
 from converse.src.reader.farm import FARMReader
-from converse.src.reader.transformers import TransformersReader
-from converse.src.retriever.dense_passage_retriever import DensePassageRetriever
 from converse.src.converse import Converse
+from converse.src.preprocessor.utils import orconvqa_read_files
 
-
-# Add document collection to a DocumentStore. The original text will be indexed. Conversion into embeddings can be
-# is done below.
+from converse.src.retriever.dense_passage_retriever import DensePassageRetriever
 from converse.src.document_store.faiss import FAISSDocumentStore
 
 document_store = FAISSDocumentStore()
 
-
-# Let's first get some files that we want to use
-# doc_dir = "data/article_txt_got"
-# s3_url = "https://s3.eu-central-1.amazonaws.com/deepset.ai-farm-qa/datasets/documents/wiki_gameofthrones_txt.zip"
-# fetch_archive_from_http(url=s3_url, output_dir=doc_dir)
-
-# Download evaluation data, which is a subset of Natural Questions development set containing 50 documents
-doc_dir = "../data/nq"
-s3_url = "https://s3.eu-central-1.amazonaws.com/deepset.ai-farm-qa/datasets/nq_dev_subset_v2.json.zip"
-fetch_archive_from_http(url=s3_url, output_dir=doc_dir)
-
-# dicts = convert_files_to_dicts(dir_path=doc_dir, clean_func=clean_wiki_text, split_paragraphs=True)
-# document_store.write_documents(dicts)
-
-document_store.add_eval_data(filename="../data/nq/nq_dev_subset_v2.json")
+pf = 'datasets/predefined/orconvqa/'
+labels, documents = orconvqa_read_files(
+    # Contains questions and answers (and a bunch of other things like history)
+    filename=pf + 'preprossesed/dev.txt',
+    # Links questions to docs
+    qrelsfile=pf + 'qrels.txt',
+    # Realy just calls a separate function, doing this in tadem means we could check if doc-ids in qrels exist
+    # We assume qrels is always correct for now
+    buildCorpus=True,
+    # "Block" file containing the raw text blocks and their ids
+    corpusFile=pf + 'document_blocks/dev_blocks.txt')
 
 
+# add eval data calls this internally, we could add it to the eval data function or just do it like this
+document_store.write_documents(documents)
+document_store.write_labels(labels)
 
-from converse.src.retriever.dense_passage_retriever import DensePassageRetriever
+
 retriever = DensePassageRetriever(
     document_store=document_store,
     query_embedding_model="facebook/dpr-question_encoder-single-nq-base",  # TODO replace with ORConvQA model
@@ -50,14 +40,12 @@ retriever = DensePassageRetriever(
 # Load a local model or any of the QA models on Hugging Face's model hub (https://huggingface.co/models)
 reader = FARMReader(model_name_or_path="deepset/roberta-base-squad2", use_gpu=True, num_processes=2)
 
-finder = Converse(reader, [retriever])
+converse = Converse(reader, [retriever])
 
-#%% md
+
 
 ## Evaluate pipeline
-
-
 # Evaluate combination of Reader and Retriever through Finder
-finder_eval_results = finder.eval(top_k_retriever=1, top_k_reader=10)
-finder.print_eval_results(finder_eval_results)
+finder_eval_results = converse.eval(top_k_retriever=1, top_k_reader=10)
+converse.print_eval_results(finder_eval_results)
 

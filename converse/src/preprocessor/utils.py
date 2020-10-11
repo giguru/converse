@@ -255,8 +255,8 @@ def orconvqa_build_corpus(filename: str) -> List[Document]:
             docs.append(cur_doc)
     return docs
 
-# TODO, this name doesnt realy make sense, should be load eval?
-def orconvqa_files_to_dicts(filename: str, qrelsfile: str, buildCorpus: bool = False, corpusFile: str = ""):
+
+def orconvqa_read_files(filename: str, qrelsfile: str, buildCorpus: bool = False, corpusFile: str = ""):
     """
     :param filename - Name of json file containing the questions, qids, answers and the question history
     :param qrelsfile - File in json format linking the qids to the doc ids of the golden passage (the passage where the answer can be found)
@@ -300,6 +300,7 @@ def orconvqa_files_to_dicts(filename: str, qrelsfile: str, buildCorpus: bool = F
                 answer=question["answer"]['text'],
                 is_correct_answer=True,
                 is_correct_document=True,
+                # We do not do an extra check if the document id exists in the corpus, this may cause issues later
                 document_id=document_id,
                 offset_start_in_doc=question["answer"]['answer_start'],
                 no_answer=question["answer"]['text'] == 'CANNOTANSWER',
