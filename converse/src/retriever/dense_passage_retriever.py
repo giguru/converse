@@ -11,12 +11,12 @@ from transformers.modeling_dpr import DPRContextEncoder, DPRQuestionEncoder
 from transformers.tokenization_dpr import DPRContextEncoderTokenizer, DPRQuestionEncoderTokenizer
 
 from converse.src.retriever.pipeline_composition_error import PipelineCompositionError
-from converse.src.retriever.retriever_pipeline_step import RetrieverPipelineStep
+from converse.src.retriever.neural_retriever_pipeline_step import NeuralRetrieverPipelineStep
 
 logger = logging.getLogger(__name__)
 
 
-class DensePassageRetriever(RetrieverPipelineStep):
+class DensePassageRetriever(NeuralRetrieverPipelineStep):
     """
         Retriever that uses a bi-encoder (one transformer for query, one transformer for passage).
         See the original paper for more details:

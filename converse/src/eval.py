@@ -2,6 +2,8 @@ from typing import List, Tuple, Dict, Any
 
 from haystack import MultiLabel
 
+from converse.src.schema import PredictionResult
+
 
 def calculate_reader_metrics(metric_counts: Dict[str, float], correct_retrievals: int):
     number_of_has_answer = correct_retrievals - metric_counts["number_of_no_answer"]
@@ -51,14 +53,14 @@ def calculate_average_precision(questions_with_docs: List[dict]):
     return questions_with_correct_doc, summed_avg_precision_retriever
 
 
-def eval_counts_reader(question: MultiLabel, predicted_answers: Dict[str, Any], metric_counts: Dict[str, float]):
+def eval_counts_reader(question: MultiLabel, predicted_answers: PredictionResult, metric_counts: Dict[str, float]):
     # Calculates evaluation metrics for one question and adds results to counter.
     # check if question is answerable
     if not question.no_answer:
         found_answer = False
         found_em = False
         best_f1 = 0
-        for answer_idx, answer in enumerate(predicted_answers["answers"]):
+        for answer_idx, answer in enumerate(predicted_answers.answers):
             if answer["document_id"] in question.multiple_document_ids:
                 gold_spans = [{"offset_start": question.multiple_offset_start_in_docs[i],
                                "offset_end": question.multiple_offset_start_in_docs[i] + len(question.multiple_answers[i]),
@@ -97,7 +99,7 @@ def eval_counts_reader(question: MultiLabel, predicted_answers: Dict[str, Any], 
     # question not answerable
     else:
         metric_counts["number_of_no_answer"] += 1
-        metric_counts = _count_no_answer(predicted_answers["answers"], metric_counts)
+        metric_counts = _count_no_answer(predicted_answers.answers, metric_counts)
 
     return metric_counts
 

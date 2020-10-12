@@ -7,10 +7,10 @@ from haystack.document_store.base import BaseDocumentStore
 from haystack import Document
 from haystack.retriever.sparse import logger
 
-from converse.src.retriever.retriever_pipeline_step import RetrieverPipelineStep
+from converse.src.retriever.neural_retriever_pipeline_step import NeuralRetrieverPipelineStep
 
 
-class EmbeddingRetriever(RetrieverPipelineStep):
+class EmbeddingRetriever(NeuralRetrieverPipelineStep):
     def __init__(self, document_store: BaseDocumentStore, embedding_model: str, use_gpu: bool = True,
                  model_format: str = "farm", pooling_strategy: str = "reduce_mean", emb_extraction_layer: int = -1):
         """

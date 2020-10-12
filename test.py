@@ -40,6 +40,8 @@ retriever = DensePassageRetriever(
     batch_size=16,
     remove_sep_tok_from_untitled_passages=True
 )
+logger.info('Update embeddings...')
+document_store.update_embeddings(retriever)
 
 logger.info('Setting up reader...')
 # Load a local model or any of the QA models on Hugging Face's model hub (https://huggingface.co/models)
