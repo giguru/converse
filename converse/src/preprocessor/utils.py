@@ -16,6 +16,9 @@ from converse.src.schema import Document, Label
 
 logger = logging.getLogger(__name__)
 
+# For testing purposes, use only N lines instead of using the entire corpus. This because creating embeddings for the
+# entire corpus takes a lot of time. The corpus contains ca. 65000 lines. Make the limit 0 (=zero) to use everything.
+LIMIT_ORCONVQA_CORPUS_LINES = 1000
 
 def eval_data_from_file(filename: str) -> Tuple[List[Document], List[Label]]:
     """
@@ -240,6 +243,9 @@ def orconvqa_build_corpus(filename: str) -> List[Document]:
     docs = []
     with open(filename, 'r') as file:
         for idx, block in enumerate(file.readlines()):
+            if 0 < LIMIT_ORCONVQA_CORPUS_LINES <= idx:
+                # stop reading lines.
+                break
             try:
                 block = json.loads(block)
             except:
@@ -271,7 +277,7 @@ def orconvqa_read_files(filename: str, qrelsfile: str, buildCorpus: bool = False
     docs = None
     if buildCorpus:
         if not os.path.isfile(corpusFile):
-            raise ValueError('Could not find corpus file')
+            raise ValueError(f'Could not find corpus file: {corpusFile}')
         docs = orconvqa_build_corpus(corpusFile)
 
     with open(qrelsfile, 'r') as f:

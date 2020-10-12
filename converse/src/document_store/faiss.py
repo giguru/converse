@@ -8,9 +8,7 @@ from faiss.swigfaiss import IndexHNSWFlat
 
 from haystack import Document
 from converse.src.document_store.sql import SQLDocumentStore
-from haystack.retriever.base import BaseRetriever
-
-from converse.src.retriever.retriever_pipeline_step import RetrieverPipelineStep
+from converse.src.retriever.neural_retriever_pipeline_step import NeuralRetrieverPipelineStep
 
 logger = logging.getLogger(__name__)
 
@@ -106,7 +104,7 @@ class FAISSDocumentStore(SQLDocumentStore):
             phi = max(phi, norms)
         return phi
 
-    def update_embeddings(self, retriever: RetrieverPipelineStep, index: Optional[str] = None):
+    def update_embeddings(self, retriever: NeuralRetrieverPipelineStep, index: Optional[str] = None):
         """
         Updates the embeddings in the the document store using the encoding model specified in the retriever.
         This can be useful if want to add or change the embeddings for your documents (e.g. after changing the retriever config).
