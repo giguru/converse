@@ -166,7 +166,7 @@ class Converse:
             single_retrieve_start = time.time()
 
             question_string = question.question
-            if not isinstance(question_string, list):
+            if isinstance(question_string, str):
                 question_string = [question_string]
 
             retrieved_docs = self.__go_through_retrievers(question_string, top_k_retriever=top_k_retriever, filters=filters)
