@@ -5,6 +5,7 @@ import tempfile
 import zipfile
 from pathlib import Path
 from typing import Callable, List, Optional, Tuple
+import orjson
 import json
 import os
 
@@ -18,7 +19,7 @@ logger = logging.getLogger(__name__)
 
 # For testing purposes, use only N lines instead of using the entire corpus. This because creating embeddings for the
 # entire corpus takes a lot of time. The corpus contains ca. 65000 lines. Make the limit 0 (=zero) to use everything.
-LIMIT_ORCONVQA_CORPUS_LINES = 0
+LIMIT_ORCONVQA_CORPUS_LINES = 2000
 
 def eval_data_from_file(filename: str) -> Tuple[List[Document], List[Label]]:
     """
@@ -287,7 +288,7 @@ def orconvqa_read_files(filename: str, qrelsfile: str, buildCorpus: bool = False
 
     with open(filename, "r") as file:
         for question in file.readlines():
-            question = json.loads(question)
+            question = orjson.loads(question)
 
             try:
                 q_doc_rel = qrels[question['qid']]
