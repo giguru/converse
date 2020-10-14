@@ -132,6 +132,16 @@ class ORConvQARetriever(NeuralRetrieverPipelineStep):
             query = query[:-1]
         return query
 
+    def _query_formatter(self, questions: List[str]):
+        if len(questions) == 0:
+            raise ValueError('The list of questions should contain at least one question')
+
+        w = 3
+        if len(questions) > w:
+            return '[CLS]' + questions[0] + "[SEP]" + "[SEP]".join(questions[-w:]) + "[SEP]"
+
+        return '[CLS]' + "[SEP]".join(questions) + "[SEP]"
+
     def _tensorizer(self, tokenizer: Union[AlbertTokenizer],
                     text: List[str],
                     title: Optional[List[str]] = None,
