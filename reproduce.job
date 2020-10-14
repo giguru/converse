@@ -1,0 +1,34 @@
+#!/bin/bash
+#SBATCH --job-name=ir2-converse
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=3
+#SBATCH --ntasks-per-node=1
+#SBATCH --time=10:00:00
+#SBATCH --mem=60000M
+#SBATCH --partition=gpu_shared_course
+#SBATCH --gres=gpu:1
+
+# Load modules from LISA SurfSara
+module purge
+module load pre2019
+python3 --version
+module load cuDNN/7.0.5-CUDA-9.0.176
+module load NCCL/2.0.5-CUDA-9.0.176
+$export LD_LIBRARY_PATH=/hpc/eb/Debian9/cuDNN/7.1-CUDA-8.0.44-GCCcore-5.4.0/lib64:$LD_LIBRARY_PATH
+
+# upgrade pip
+# python3 -m pip install --user --upgrade pip
+
+# Create folders in Scratch
+mkdir "$TMPDIR"/data
+mkdir "$TMPDIR"/output
+mkdir "$TMPDIR"/cache
+
+# Copy root files. Do not recursively copy from the root, since the output folder needs to be excluded
+echo "Copying root files"
+cp $HOME/converse/* "$TMPDIR"
+
+srun python3 test.py
+
+#Copy output data from scratch to home
+cp -r "$TMPDIR"/output $HOME/converse/output
