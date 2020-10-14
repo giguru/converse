@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 
 # For testing purposes, use only N lines instead of using the entire corpus. This because creating embeddings for the
 # entire corpus takes a lot of time. The corpus contains ca. 65000 lines. Make the limit 0 (=zero) to use everything.
-LIMIT_ORCONVQA_CORPUS_LINES = 1000
+LIMIT_ORCONVQA_CORPUS_LINES = 160
 
 def eval_data_from_file(filename: str) -> Tuple[List[Document], List[Label]]:
     """

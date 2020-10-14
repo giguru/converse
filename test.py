@@ -12,7 +12,7 @@ from converse.src.retriever.orconvqa_retriever import ORConvQARetriever
 logger = logging.getLogger(__name__)
 
 logger.info('Creating document store...')
-document_store = FAISSDocumentStore()
+document_store = FAISSDocumentStore(vector_dim=128)
 
 logger.info('Loading data...')
 pf = 'datasets/predefined/orconvqa/'

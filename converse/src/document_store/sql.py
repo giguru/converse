@@ -5,10 +5,11 @@ from uuid import uuid4
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, func, ForeignKey, Boolean
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship, sessionmaker
+from sqlalchemy.sql import case
 
 from converse.src.document_store.base import BaseDocumentStore
-from haystack import Document, Label
-from haystack.preprocessor.utils import eval_data_from_file
+from converse.src.schema import Document, Label
+from converse.src.preprocessor.utils import eval_data_from_file
 
 Base = declarative_base()  # type: Any
 
@@ -26,16 +27,17 @@ class DocumentORM(ORMBase):
 
     text = Column(String, nullable=False)
     index = Column(String, nullable=False)
+    vector_id = Column(String, unique=True, nullable=True)
 
-    meta = relationship("MetaORM", backref="Document")
-
+    # speeds up queries for get_documents_by_vector_ids() by having a single query that returns joined metadata
+    meta = relationship("MetaORM", backref="Document", lazy="joined")
 
 class MetaORM(ORMBase):
     __tablename__ = "meta"
 
     name = Column(String, index=True)
     value = Column(String, index=True)
-    document_id = Column(String, ForeignKey("document.id"), nullable=False)
+    document_id = Column(String, ForeignKey("document.id", ondelete="CASCADE"), nullable=False)
 
     documents = relationship(DocumentORM, backref="Meta")
 
@@ -43,7 +45,7 @@ class MetaORM(ORMBase):
 class LabelORM(ORMBase):
     __tablename__ = "label"
 
-    document_id = Column(String, ForeignKey("document.id"), nullable=False)
+    document_id = Column(String, ForeignKey("document.id", ondelete="CASCADE"), nullable=False)
     index = Column(String, nullable=False)
     no_answer = Column(Boolean, nullable=False)
     origin = Column(String, nullable=False)
@@ -76,6 +78,16 @@ class SQLDocumentStore(BaseDocumentStore):
 
         return documents
 
+    def get_documents_by_vector_ids(self, vector_ids: List[str], index: Optional[str] = None):
+        index = index or self.index
+        results = self.session.query(DocumentORM).filter(
+            DocumentORM.vector_id.in_(vector_ids),
+            DocumentORM.index == index
+        ).all()
+        sorted_results = sorted(results, key=lambda doc: vector_ids.index(doc.vector_id))  # type: ignore
+        documents = [self._convert_sql_row_to_document(row) for row in sorted_results]
+        return documents
+
     def get_all_documents(
         self, index: Optional[str] = None, filters: Optional[Dict[str, List[str]]] = None
     ) -> List[Document]:
@@ -100,7 +112,6 @@ class SQLDocumentStore(BaseDocumentStore):
     def write_documents(self, documents: Union[List[dict], List[Document]], index: Optional[str] = None):
         """
         Indexes documents for later queries.
-
       :param documents: a list of Python dictionaries or a list of Haystack Document objects.
                           For documents as dictionaries, the format is {"text": "<the-actual-text>"}.
                           Optionally: Include meta data via {"text": "<the-actual-text>",
@@ -108,7 +119,6 @@ class SQLDocumentStore(BaseDocumentStore):
                           It can be used for filtering and is accessible in the responses of the Finder.
         :param index: add an optional index attribute to documents. It can be later used for filtering. For instance,
                       documents for evaluation can be indexed in a separate index than the documents for search.
-
         :return: None
         """
 
@@ -117,8 +127,9 @@ class SQLDocumentStore(BaseDocumentStore):
         index = index or self.index
         for doc in document_objects:
             meta_fields = doc.meta or {}
+            vector_id = meta_fields.get("vector_id")
             meta_orms = [MetaORM(name=key, value=value) for key, value in meta_fields.items()]
-            doc_orm = DocumentORM(id=doc.id, text=doc.text, meta=meta_orms, index=index)
+            doc_orm = DocumentORM(id=doc.id, text=doc.text, vector_id=vector_id, meta=meta_orms, index=index)
             self.session.add(doc_orm)
         self.session.commit()
 
@@ -142,6 +153,24 @@ class SQLDocumentStore(BaseDocumentStore):
             self.session.add(label_orm)
         self.session.commit()
 
+    def update_vector_ids(self, vector_id_map: Dict[str, str], index: Optional[str] = None):
+        """
+        Update vector_ids for given document_ids.
+        :param vector_id_map: dict containing mapping of document_id -> vector_id.
+        :param index: filter documents by the optional index attribute for documents in database.
+        """
+        index = index or self.index
+        self.session.query(DocumentORM).filter(
+            DocumentORM.id.in_(vector_id_map),
+            DocumentORM.index == index
+        ).update({
+            DocumentORM.vector_id: case(
+                vector_id_map,
+                value=DocumentORM.id,
+            )
+        }, synchronize_session=False)
+        self.session.commit()
+
     def update_document_meta(self, id: str, meta: Dict[str, str]):
         self.session.query(MetaORM).filter_by(document_id=id).delete()
         meta_orms = [MetaORM(name=key, value=value, document_id=id) for key, value in meta.items()]
@@ -152,7 +181,6 @@ class SQLDocumentStore(BaseDocumentStore):
     def add_eval_data(self, filename: str, doc_index: str = "eval_document", label_index: str = "label"):
         """
         Adds a SQuAD-formatted file to the DocumentStore in order to be able to perform evaluation on it.
-
         :param filename: Name of the file containing evaluation data
         :type filename: str
         :param doc_index: Elasticsearch index where evaluation documents should be stored
@@ -179,6 +207,8 @@ class SQLDocumentStore(BaseDocumentStore):
             text=row.text,
             meta={meta.name: meta.value for meta in row.meta}
         )
+        if row.vector_id:
+            document.meta["vector_id"] = row.vector_id  # type: ignore
         return document
 
     def _convert_sql_row_to_label(self, row) -> Label:
@@ -208,7 +238,6 @@ class SQLDocumentStore(BaseDocumentStore):
     def delete_all_documents(self, index=None):
         """
         Delete all documents in a index.
-
         :param index: index name
         :return: None
         """
