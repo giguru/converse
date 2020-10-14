@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 logger.info('Creating document store...')
 document_store = FAISSDocumentStore(vector_dim=128)
 
-logger.info('Loading data...')
+logger.info('Loading data files...')
 pf = 'datasets/predefined/orconvqa/'
 labels, documents = orconvqa_read_files(
     # Contains questions and answers (and a bunch of other things like history)
@@ -27,6 +27,7 @@ labels, documents = orconvqa_read_files(
     # "Block" file containing the raw text blocks and their ids
     corpusFile=pf + 'document_blocks/all_blocks.txt')
 
+logger.info('Writing data into documents store...')
 
 # add eval data calls this internally, we could add it to the eval data function or just do it like this
 document_store.write_documents(documents)
