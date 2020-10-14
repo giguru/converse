@@ -5,6 +5,7 @@ import tempfile
 import zipfile
 from pathlib import Path
 from typing import Callable, List, Optional, Tuple
+import orjson
 import json
 import os
 
@@ -287,7 +288,7 @@ def orconvqa_read_files(filename: str, qrelsfile: str, buildCorpus: bool = False
 
     with open(filename, "r") as file:
         for question in file.readlines():
-            question = json.loads(question)
+            question = orjson.loads(question)
 
             try:
                 q_doc_rel = qrels[question['qid']]
