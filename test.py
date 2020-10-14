@@ -46,7 +46,7 @@ document_store.update_embeddings(retriever)
 
 logger.info('Setting up reader...')
 # Load a local model or any of the QA models on Hugging Face's model hub (https://huggingface.co/models)
-reader = FARMReader(model_name_or_path="deepset/roberta-base-squad2", use_gpu=True, num_processes=2)
+reader = FARMReader(model_name_or_path="bert-base-uncased", use_gpu=True, num_processes=2)
 
 converse = Converse(reader, [retriever])
 
