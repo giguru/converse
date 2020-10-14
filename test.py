@@ -6,6 +6,9 @@ from converse.src.retriever.dense_passage_retriever import DensePassageRetriever
 from converse.src.document_store.faiss import FAISSDocumentStore
 
 import logging
+
+from converse.src.retriever.orconvqa_retriever import ORConvQARetriever
+
 logger = logging.getLogger(__name__)
 
 logger.info('Creating document store...')
@@ -30,10 +33,8 @@ document_store.write_documents(documents)
 document_store.write_labels(labels)
 
 logger.info('Setting up retriever...')
-retriever = DensePassageRetriever(
+retriever = ORConvQARetriever(
     document_store=document_store,
-    query_embedding_model="facebook/dpr-question_encoder-single-nq-base",  # TODO replace with ORConvQA model
-    passage_embedding_model="facebook/dpr-ctx_encoder-single-nq-base",  # TODO replace with ORConvQA model
     use_gpu=True,
     embed_title=True,
     max_seq_len=256,
