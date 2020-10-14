@@ -97,7 +97,7 @@ class Converse:
         if len(self.__retrievers) == 0:
             raise Exception(f"{type(self).__name__} needs to have at least one retriever for the evaluation.")
 
-    def eval(self,  doc_index: str = "eval_document", label_index: str = "label", label_origin: str = "gold_label",
+    def eval(self,  doc_index: str = "eval_document", label_index: str = "label",
             top_k_retriever: int = 10, top_k_reader: int = 10):
         """
         Evaluation of the whole pipeline by first evaluating the Retriever and then evaluating the Reader on the result

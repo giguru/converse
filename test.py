@@ -25,7 +25,7 @@ labels, documents = orconvqa_read_files(
     # We assume qrels is always correct for now
     buildCorpus=True,
     # "Block" file containing the raw text blocks and their ids
-    corpusFile=pf + 'document_blocks/dev_blocks.txt')
+    corpusFile=pf + 'document_blocks/all_blocks.txt')
 
 
 # add eval data calls this internally, we could add it to the eval data function or just do it like this
@@ -53,6 +53,6 @@ converse = Converse(reader, [retriever])
 ## Evaluate pipeline
 # Evaluate combination of Reader and Retriever through Finder
 logger.info('Evaluate...')
-finder_eval_results = converse.eval(top_k_retriever=1, top_k_reader=10)
-converse.print_eval_results(finder_eval_results)
+eval_results = converse.eval(top_k_retriever=1, top_k_reader=10)
+converse.print_eval_results(eval_results)
 
