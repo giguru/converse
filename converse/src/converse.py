@@ -162,14 +162,17 @@ class Converse:
         # retrieve documents
         questions_with_docs = []
         retriever_start_time = time.time()
-        for q_idx, question in enumerate(questions):
+        for q_idx, question in enumerate(questions):  # type:
             single_retrieve_start = time.time()
 
-            question_string = question.question
-            if isinstance(question_string, str):
-                question_string = [question_string]
+            question_list = question.question
+            if isinstance(question_list, str):
+                question_list = [question_list]
 
-            retrieved_docs = self.__go_through_retrievers(question_string, top_k_retriever=top_k_retriever, filters=filters)
+            if isinstance(question.previous_questions_in_conversation, list):
+                question_list = question.previous_questions_in_conversation + question_list
+
+            retrieved_docs = self.__go_through_retrievers(question_list, top_k_retriever=top_k_retriever, filters=filters)
             retrieve_times.append(time.time() - single_retrieve_start)
 
             # check if correct doc among retrieved docs
@@ -193,10 +196,10 @@ class Converse:
                 print(f"Processed {q_idx + 1} questions.")
 
             question = question_docs["question"]  # type: ignore
-            question_string = question.question
+            question_list = question.question
             docs = question_docs["docs"]  # type: ignore
             single_reader_start = time.time()
-            predicted_answers = self.__reader.predict(question_string, docs, top_k=top_k_reader)  # type: ignore
+            predicted_answers = self.__reader.predict(question_list, docs, top_k=top_k_reader)  # type: ignore
             read_times.append(time.time() - single_reader_start)
             counts = eval_counts_reader(question, predicted_answers, counts)
 

@@ -88,6 +88,7 @@ class BaseDocumentStore(ABC):
                                            multiple_offset_start_in_docs=[l.offset_start_in_doc],
                                            no_answer=l.no_answer,
                                            model_id=l.model_id,
+                                           previous_questions_in_conversation=l.previous_questions_in_conversation,
                                            )
                 else:
                     agg_label.multiple_answers.append(l.answer)

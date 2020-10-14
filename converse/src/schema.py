@@ -166,7 +166,9 @@ class MultiLabel:
                  multiple_document_ids: List[Any],
                  multiple_offset_start_in_docs: List[Any],
                  no_answer: Optional[bool] = None,
-                 model_id: Optional[int] = None):
+                 model_id: Optional[int] = None,
+                 previous_questions_in_conversation: Optional[List[str]] = None,
+                 ):
         """
         Object used to aggregate multiple possible answers for the same question
 
@@ -191,6 +193,7 @@ class MultiLabel:
         self.multiple_offset_start_in_docs = multiple_offset_start_in_docs
         self.no_answer = no_answer
         self.model_id = model_id
+        self.previous_questions_in_conversation = previous_questions_in_conversation
 
     @classmethod
     def from_dict(cls, dict):
