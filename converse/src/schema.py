@@ -30,12 +30,7 @@ class Document:
         """
 
         self.text = text
-        # Create a unique ID (either new one, or one from user input)
-        if id:
-            self.id = str(id)
-        else:
-            self.id = str(uuid4())
-
+        self.id = str(id) if id else str(uuid4())  # Create a unique ID (either new one, or one from user input)
         self.score = score
         self.probability = probability
         self.question = question
