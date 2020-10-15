@@ -74,12 +74,7 @@ class Converse:
     def __go_through_retrievers(self, questions: List[str], filters: Optional[dict], top_k_retriever: int):
         documents = None
         for idx, retriever in enumerate(self.__retrievers):
-            if idx == 0:
-                documents = retriever.initial_retrieve(questions, filters=filters, top_k=top_k_retriever)
-            else:  # follow up retrieval
-                documents = retriever.follow_up_retrieve(questions, documents, filters=filters,
-                                                         top_k=top_k_retriever)
-
+            documents = retriever.retrieve(questions, previous_documents=documents, filters=filters, top_k=top_k_retriever)
             if len(documents) == 0:
                 logger.info(
                     f"Retriever {idx} of class {type(retriever).__name__} did not return any documents. Stopping retrieval process...")

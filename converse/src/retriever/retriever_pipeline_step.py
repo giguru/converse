@@ -31,28 +31,19 @@ class RetrieverPipelineStep(ABC):
         return questions[-1]  # By default only use the last string
 
     @abstractmethod
-    def initial_retrieve(self, questions: List[str], filters: dict = None, top_k: int = 10) -> List[Document]:
+    def retrieve(
+            self, questions: List[str], previous_documents: List[Document], filters: dict = None, top_k: int = 10
+    ) -> List[Document]:
         """
         Scan through documents in DocumentStore and return a small number documents that are most relevant to the query.
 
         :param questions: The query
+        :param previous_documents: Documents returned by the previous retriever
         :param filters: A dictionary where the keys specify a metadata field and the value is a list of accepted
             values for that field
         :param top_k: How many documents to return per query.
         """
         pass
-
-    @abstractmethod
-    def follow_up_retrieve(self, questions: List[str], previous_documents: List[Document], filters: dict = None, top_k: int = 10) -> List[Document]:
-        """
-        After initial retrieval, you might want to add follow up retrieval steps, such as LTR or splitting the
-        documents into passages.
-
-        :param questions: Converse is conversational, so these are all the questions in the conversation.
-            With the most recent one last in the list.
-        :param previous_documents: The documents returned by the previous retriever.
-        :param top_k: How many documents to return per query.
-        """
 
     def eval(
             self,
