@@ -86,7 +86,11 @@ class FAISSDocumentStore(SQLDocumentStore):
             index = faiss.index_factory(vector_dim, index_factory, metric_type)
         return index
 
-    def write_documents(self, documents: List[Document], index: Optional[str] = None):
+    def write_documents(self,
+                        documents: Union[List[dict],
+                        List[Document]],
+                        index: Optional[str] = None,
+                        embeddingRetriever: NeuralRetrieverPipelineStep = None):
         """
         Add new documents to the DocumentStore.
         :param documents: List of `Documents`. If they already contain the embeddings, we'll index them right away
@@ -105,6 +109,11 @@ class FAISSDocumentStore(SQLDocumentStore):
             add_vectors = False if document_objects[0].embedding is None else True
 
             vector_id = self.faiss_index.ntotal
+            if embeddingRetriever != None:
+                embeddings = np.array(embeddingRetriever.embed_passages(document_objects), dtype="float32")
+                self.faiss_index.add(embeddings)
+                del embeddings
+
             if add_vectors:
                 embeddings = [doc.embedding for doc in document_objects]
                 embeddings = np.array(embeddings, dtype="float32")
