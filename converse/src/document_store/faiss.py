@@ -110,7 +110,7 @@ class FAISSDocumentStore(SQLDocumentStore):
 
             vector_id = self.faiss_index.ntotal
             if embeddingRetriever != None:
-                embeddings = embeddingRetriever.embed_passages(document_objects)
+                embeddings = np.array(embeddingRetriever.embed_passages(document_objects), dtype="float32")
                 self.faiss_index.add(embeddings)
                 del embeddings
 
