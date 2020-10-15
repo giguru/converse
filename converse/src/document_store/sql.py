@@ -4,7 +4,7 @@ from uuid import uuid4
 
 from sqlalchemy import create_engine, Column, Integer, String, DateTime, func, ForeignKey, Boolean
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import relationship, sessionmaker
+from sqlalchemy.orm import relationship, sessionmaker, Query
 from sqlalchemy.sql import case
 
 from converse.src.document_store.base import BaseDocumentStore
@@ -89,17 +89,33 @@ class SQLDocumentStore(BaseDocumentStore):
         return documents
 
     def get_all_documents(
-        self, index: Optional[str] = None, filters: Optional[Dict[str, List[str]]] = None
+            self, index: Optional[str] = None, filters: Optional[Dict[str, List[str]]] = None
     ) -> List[Document]:
         index = index or self.index
-        query = self.session.query(DocumentORM).filter_by(index=index)
-
-        if filters:
-            query = query.join(MetaORM)
-            for key, values in filters.items():
-                query = query.filter(MetaORM.name == key, MetaORM.value.in_(values))
-
+        query = self.__get_query_for_documents(index=index, filters=filters)
         documents = [self._convert_sql_row_to_document(row) for row in query.all()]
+        return documents
+
+    def get_total_number_of_documents(
+            self, index: Optional[str] = None, filters: Optional[Dict[str, List[str]]] = None
+    ) -> int:
+        index = index or self.index
+        query = self.__get_query_for_documents(index=index, filters=filters)
+        total = len(query.all())
+        del query
+        return total
+
+    def get_batch_of_documents(
+            self,
+            index: Optional[str] = None,
+            filters: Optional[Dict[str, List[str]]] = None,
+            batch_number: int = 0,
+            batch_size: int = 100
+    ) -> List[Document]:
+        index = index or self.index
+        query = self.__get_query_for_documents(index=index, filters=filters)
+        offset = batch_number * batch_size
+        documents = [self._convert_sql_row_to_document(row) for row in query.offset(offset).limit(batch_size).all()]
         return documents
 
     def get_all_labels(self, index=None, filters: Optional[dict] = None):
@@ -255,3 +271,15 @@ class SQLDocumentStore(BaseDocumentStore):
             session.add(instance)
             session.commit()
             return instance
+
+    def __get_query_for_documents(self, index, filters: Optional[Dict[str, List[str]]] = None) -> Query:
+        query = self.session.query(DocumentORM).filter_by(index=index)  # type: Query
+        if filters:
+            query = self.__apply_filters_to_query(query=query, filters=filters)
+        return query
+
+    def __apply_filters_to_query(self, query: Query, filters: Union[Dict[str, List[str]]]):
+        query = query.join(MetaORM)
+        for key, values in filters.items():
+            query = query.filter(MetaORM.name == key, MetaORM.value.in_(values))
+        return query

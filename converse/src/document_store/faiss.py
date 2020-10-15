@@ -122,7 +122,7 @@ class FAISSDocumentStore(SQLDocumentStore):
             super(FAISSDocumentStore, self).write_documents(docs_to_write_in_sql, index=index)
             del document_objects, docs_to_write_in_sql  # release memory
 
-    def update_embeddings(self, retriever: NeuralRetrieverPipelineStep, index: Optional[str] = None):
+    def update_embeddings(self, retriever: NeuralRetrieverPipelineStep, index: Optional[str] = None, batch_size: int = 80):
         """
         Updates the embeddings in the the document store using the encoding model specified in the retriever.
         This can be useful if want to add or change the embeddings for your documents (e.g. after changing the retriever config).
@@ -134,31 +134,38 @@ class FAISSDocumentStore(SQLDocumentStore):
         self.faiss_index.reset()
 
         index = index or self.index
-        documents = self.get_all_documents(index=index)
 
-        if len(documents) == 0:
+        total_number_of_documents = self.get_total_number_of_documents(index=index)
+        if total_number_of_documents == 0:  # only check empty result on first iteration
             logger.warning("Calling DocumentStore.update_embeddings() on an empty index")
             self.faiss_index = None
             return
+        logger.info(f"Updating embeddings for with {total_number_of_documents} docs...")
 
-        logger.info(f"Updating embeddings for {len(documents)} docs...")
-        embeddings = retriever.embed_passages(documents)  # type: ignore
-        assert len(documents) == len(embeddings)
-        for i, doc in enumerate(documents):
-            doc.embedding = embeddings[i]
+        batch_number = 0
+        for k in tqdm(range(0, total_number_of_documents, batch_size)):
+            documents = self.get_batch_of_documents(index=index, batch_number=batch_number, batch_size=batch_size)
+            if len(documents) == 0:
+                break
 
-        logger.info("Indexing embeddings and updating vectors_ids...")
-        for i in tqdm(range(0, len(documents), self.index_buffer_size)):
+            embeddings = retriever.embed_passages(documents, show_logging=False)  # type: ignore
+            assert len(documents) == len(embeddings)
+
             vector_id_map = {}
             vector_id = self.faiss_index.ntotal
-            embeddings = [doc.embedding for doc in documents[i: i + self.index_buffer_size]]
-            embeddings = np.array(embeddings, dtype="float32")
-            self.faiss_index.add(embeddings)
+            for i, doc in enumerate(documents):
+                doc.embedding = embeddings[i]
+                embeddings = np.array(embeddings, dtype="float32")
+                self.faiss_index.add(embeddings)
 
-            for doc in documents[i: i + self.index_buffer_size]:
                 vector_id_map[doc.id] = vector_id
                 vector_id += 1
+
             self.update_vector_ids(vector_id_map, index=index)
+
+            # increment batch number
+            batch_number = batch_number + 1
+
 
     def train_index(self, documents: Optional[Union[List[dict], List[Document]]], embeddings: Optional[np.array] = None):
         """

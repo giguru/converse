@@ -107,7 +107,7 @@ class ORConvQARetriever(NeuralRetrieverPipelineStep):
                                                   batch_size=self.batch_size)
         return result
 
-    def embed_passages(self, docs: List[Document]) -> List[np.array]:
+    def embed_passages(self, docs: List[Document], show_logging: bool = True) -> List[np.array]:
         """
         Create embeddings for a list of passages using the passage encoder
 
@@ -119,6 +119,7 @@ class ORConvQARetriever(NeuralRetrieverPipelineStep):
                                                   model=self.passage_encoder,
                                                   tokenizer=self.passage_tokenizer,
                                                   embedding_passages=True,
+                                                  show_logging=show_logging,
                                                   batch_size=self.batch_size)
         return result
 
@@ -233,6 +234,7 @@ class ORConvQARetriever(NeuralRetrieverPipelineStep):
                                     tokenizer: Union[AlbertTokenizer],
                                     embedding_passages: bool = False,
                                     embedding_queries: bool = False,
+                                    show_logging: bool = True,
                                     batch_size: int = 16) -> List[Tuple[object, np.array]]:
         n = len(texts)
         total = 0
@@ -264,7 +266,7 @@ class ORConvQARetriever(NeuralRetrieverPipelineStep):
                 for i in range(out.size(0))
             ])
 
-            if total % 10 == 0:
+            if show_logging and total % 10 == 0:
                 logger.info(f'Embedded {total} / {n} texts')
 
         return results
