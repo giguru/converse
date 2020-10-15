@@ -102,7 +102,7 @@ class FAISSDocumentStore(SQLDocumentStore):
 
         add_vectors = False if document_objects[0].embedding is None else True
 
-        for i in range(0, len(document_objects), self.index_buffer_size):
+        for i in tqdm(range(0, len(document_objects), self.index_buffer_size)):
             vector_id = self.faiss_index.ntotal
             if add_vectors:
                 embeddings = [doc.embedding for doc in document_objects[i: i + self.index_buffer_size]]
