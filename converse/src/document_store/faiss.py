@@ -86,11 +86,11 @@ class FAISSDocumentStore(SQLDocumentStore):
             index = faiss.index_factory(vector_dim, index_factory, metric_type)
         return index
 
-    def write_documents(self, documents: Union[List[dict], List[Document]], index: Optional[str] = None):
+    def write_documents(self, documents: List[Document], index: Optional[str] = None):
         """
         Add new documents to the DocumentStore.
-        :param documents: List of `Dicts` or List of `Documents`. If they already contain the embeddings, we'll index
-                          them right away in FAISS. If not, you can later call update_embeddings() to create & index them.
+        :param documents: List of `Documents`. If they already contain the embeddings, we'll index them right away
+                          in FAISS. If not, you can later call update_embeddings() to create & index them.
         :param index: (SQL) index name for storing the docs and metadata
         :return:
         """
@@ -101,7 +101,7 @@ class FAISSDocumentStore(SQLDocumentStore):
         index = index or self.index
 
         for i in tqdm(range(0, len(documents), self.index_buffer_size)):
-            document_objects = [Document.from_dict(d) if isinstance(d, dict) else d for d in documents[i: i + self.index_buffer_size]]
+            document_objects = documents[i: i + self.index_buffer_size]
             add_vectors = False if document_objects[0].embedding is None else True
 
             vector_id = self.faiss_index.ntotal
