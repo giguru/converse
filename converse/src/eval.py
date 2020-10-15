@@ -1,8 +1,6 @@
 from typing import List, Tuple, Dict, Any
 
-from haystack import MultiLabel
-
-from converse.src.schema import PredictionResult
+from converse.src.schema import PredictionResult, MultiLabel
 
 
 def calculate_reader_metrics(metric_counts: Dict[str, float], correct_retrievals: int):

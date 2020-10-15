@@ -1,4 +1,5 @@
 import logging
+from guppy import hpy; h=hpy()
 from pathlib import Path
 from sys import platform
 from typing import Union, List, Optional, Dict
@@ -8,7 +9,7 @@ import numpy as np
 from tqdm import tqdm
 from faiss.swigfaiss import IndexHNSWFlat
 
-from haystack import Document
+from converse.src.schema import Document
 from converse.src.document_store.sql import SQLDocumentStore
 from converse.src.retriever.neural_retriever_pipeline_step import NeuralRetrieverPipelineStep
 
@@ -98,19 +99,20 @@ class FAISSDocumentStore(SQLDocumentStore):
             raise ValueError("Couldn't find a FAISS index. Try to init the FAISSDocumentStore() again ...")
         # doc + metadata index
         index = index or self.index
-        document_objects = [Document.from_dict(d) if isinstance(d, dict) else d for d in documents]
 
-        add_vectors = False if document_objects[0].embedding is None else True
+        for i in tqdm(range(0, len(documents), self.index_buffer_size)):
+            document_objects = [Document.from_dict(d) if isinstance(d, dict) else d for d in documents[i: i + self.index_buffer_size]]
+            add_vectors = False if document_objects[0].embedding is None else True
 
-        for i in tqdm(range(0, len(document_objects), self.index_buffer_size)):
             vector_id = self.faiss_index.ntotal
             if add_vectors:
-                embeddings = [doc.embedding for doc in document_objects[i: i + self.index_buffer_size]]
+                embeddings = [doc.embedding for doc in document_objects]
                 embeddings = np.array(embeddings, dtype="float32")
                 self.faiss_index.add(embeddings)
+                del embeddings  # save memory
 
             docs_to_write_in_sql = []
-            for doc in document_objects[i : i + self.index_buffer_size]:
+            for doc in document_objects:
                 meta = doc.meta
                 if add_vectors:
                     meta["vector_id"] = vector_id
@@ -118,6 +120,7 @@ class FAISSDocumentStore(SQLDocumentStore):
                 docs_to_write_in_sql.append(doc)
 
             super(FAISSDocumentStore, self).write_documents(docs_to_write_in_sql, index=index)
+            del document_objects, docs_to_write_in_sql  # release memory
 
     def update_embeddings(self, retriever: NeuralRetrieverPipelineStep, index: Optional[str] = None):
         """

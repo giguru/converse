@@ -3,7 +3,7 @@ from scipy.special import expit
 from abc import ABC, abstractmethod
 from typing import List, Optional, Sequence
 
-from haystack import Document
+from converse.src.schema import Document
 
 
 class BaseReader(ABC):

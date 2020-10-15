@@ -19,9 +19,9 @@ from farm.utils import set_all_seeds, initialize_device_settings
 from scipy.special import expit
 import shutil
 
-from haystack import Document
-from haystack.document_store.base import BaseDocumentStore
-from haystack.reader.base import BaseReader
+from converse.src.schema import Document
+from converse.src.document_store.base import BaseDocumentStore
+from converse.src.reader.base import BaseReader
 
 from converse.src.schema import PredictionResult
 

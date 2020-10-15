@@ -1,13 +1,14 @@
 from typing import List, Union
 import numpy as np
-
+import logging
 from farm.infer import Inferencer
 
-from haystack.document_store.base import BaseDocumentStore
-from haystack import Document
-from haystack.retriever.sparse import logger
+from converse.src.document_store.base import BaseDocumentStore
+from converse.src.schema import Document
 
 from converse.src.retriever.neural_retriever_pipeline_step import NeuralRetrieverPipelineStep
+
+logger = logging.getLogger(__name__)
 
 
 class EmbeddingRetriever(NeuralRetrieverPipelineStep):

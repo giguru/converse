@@ -4,8 +4,7 @@ from typing import List, Union, Tuple, Optional
 from transformers import AlbertConfig, AlbertTokenizer
 
 from converse.src.document_store.base import BaseDocumentStore
-from haystack import Document
-from haystack.retriever.sparse import logger
+from converse.src.schema import Document
 
 from transformers.modeling_dpr import DPRContextEncoder, DPRQuestionEncoder
 from transformers.tokenization_dpr import DPRContextEncoderTokenizer, DPRQuestionEncoderTokenizer
@@ -116,10 +115,6 @@ class ORConvQARetriever(NeuralRetrieverPipelineStep):
         :return: Embeddings of documents / passages shape (batch_size, embedding_dim)
         """
         texts = [d.text for d in docs]
-        titles = None
-        if self.embed_title:
-            titles = [d.meta["name"] if d.meta and "name" in d.meta else "" for d in docs]
-
         result = self._generate_batch_predictions(texts=texts,
                                                   model=self.passage_encoder,
                                                   tokenizer=self.passage_tokenizer,

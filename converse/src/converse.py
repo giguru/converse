@@ -3,7 +3,7 @@ import logging
 import time
 from statistics import mean
 from collections import defaultdict
-from haystack.reader.base import BaseReader
+from converse.src.reader.base import BaseReader
 
 from converse.src.eval import eval_counts_reader, eval_counts_reader_batch, calculate_reader_metrics, \
     calculate_average_precision

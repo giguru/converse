@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 from typing import List
-from haystack import Document
+from converse.src.schema import Document
 import logging
 
 from converse.src.document_store.base import BaseDocumentStore
