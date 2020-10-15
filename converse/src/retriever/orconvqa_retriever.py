@@ -72,7 +72,7 @@ class ORConvQARetriever(NeuralRetrieverPipelineStep):
 
 
     def retrieve(self, questions: List[str], previous_documents: List[Document], filters: dict = None, top_k: int = 10) -> List[Document]:
-        if previous_documents is None:
+        if previous_documents is not None:
             raise PipelineCompositionError('the Dense Passage Retriever was taken from Haystack and was not designed to be used as a follow retriever')
         # Use the document store default index
         index = self._index or self.document_store.index
