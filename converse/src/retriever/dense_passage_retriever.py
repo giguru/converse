@@ -74,8 +74,7 @@ class DensePassageRetriever(NeuralRetrieverPipelineStep):
         if previous_documents is not None:
             raise PipelineCompositionError('the Dense Passage Retriever was taken from Haystack and was not designed to be used as a follow retriever')
 
-        # Use the document store default index
-        index = self.document_store.index
+        index = self._index or self.document_store.index
 
         query = self._query_formatter(questions)
         query_emb = self.embed_queries(texts=[query])
