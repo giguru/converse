@@ -123,7 +123,7 @@ class FAISSDocumentStore(SQLDocumentStore):
             docs_to_write_in_sql = []
             for doc in document_objects:
                 meta = doc.meta
-                if add_vectors:
+                if add_vectors or embeddingRetriever:
                     meta["vector_id"] = vector_id
                     vector_id += 1
                 docs_to_write_in_sql.append(doc)
