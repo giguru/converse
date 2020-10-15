@@ -70,27 +70,16 @@ class DensePassageRetriever(NeuralRetrieverPipelineStep):
         self.passage_tokenizer = DPRContextEncoderTokenizer.from_pretrained(passage_embedding_model)
         self.passage_encoder = DPRContextEncoder.from_pretrained(passage_embedding_model).to(self.device)
 
-    def initial_retrieve(self, questions: List[str], filters: dict = None, top_k: int = 10) -> List[Document]:
-        """
-        :param index:
-        :param questions: Questions from the same conversation
-        :param filters:
-        :param top_k:
-        :return:
-        """
+    def retrieve(self, questions: List[str], previous_documents: List[Document], filters: dict = None, top_k: int = 10) -> List[Document]:
+        if previous_documents is not None:
+            raise PipelineCompositionError('the Dense Passage Retriever was taken from Haystack and was not designed to be used as a follow retriever')
+
+        # Use the document store default index
+        index = self.document_store.index
+
         query = self._query_formatter(questions)
-        return self.retrieve(query, top_k=top_k)
-
-    def follow_up_retrieve(self, questions: List[str], previous_documents: List[Document], filters: dict = None, top_k: int = 10) -> List[Document]:
-        raise PipelineCompositionError('the Dense Passage Retriever was taken from Haystack and was not designed to be used as a follow retriever')
-
-    def retrieve(self, query: str, top_k: int = 10, index: str = None) -> List[Document]:
-        if index is None:
-            # Use the document store default index
-            index = self.document_store.index
         query_emb = self.embed_queries(texts=[query])
-        documents = self.document_store.query_by_embedding(query_emb=query_emb[0], top_k=top_k, index=index)
-        return documents
+        return self.document_store.query_by_embedding(query_emb=query_emb[0], top_k=top_k, index=index)
 
     def embed_queries(self, texts: List[str]) -> List[np.array]:
         """
