@@ -14,5 +14,5 @@ class NeuralRetrieverPipelineStep(RetrieverPipelineStep):
         pass
 
     @abstractmethod
-    def embed_passages(self, docs: List[Document]) -> List[np.array]:
+    def embed_passages(self, docs: List[Document], show_logging: bool = True) -> List[np.array]:
         pass

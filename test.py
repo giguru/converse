@@ -31,7 +31,9 @@ logger.info('Writing data into documents store...')
 
 # add eval data calls this internally, we could add it to the eval data function or just do it like this
 document_store.write_documents(documents)
+del documents  # Free memory
 document_store.write_labels(labels)
+del labels  # Free memory
 
 logger.info('Setting up retriever...')
 retriever = ORConvQARetriever(

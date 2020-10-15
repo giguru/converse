@@ -100,7 +100,7 @@ class EmbeddingRetriever(NeuralRetrieverPipelineStep):
         """
         return self.embed(texts)
 
-    def embed_passages(self, docs: List[Document]) -> List[np.array]:
+    def embed_passages(self, docs: List[Document], show_logging: bool = True) -> List[np.array]:
         """
         Create embeddings for a list of passages. For this Retriever type: The same as calling .embed()
 
