@@ -4,6 +4,7 @@ from typing import List, Union, Tuple, Optional
 from transformers import AlbertConfig, AlbertTokenizer
 
 from converse.src.document_store.base import BaseDocumentStore
+from converse.src.query_formatters import conversational_question_formatter
 from converse.src.schema import Document
 
 from transformers.modeling_dpr import DPRContextEncoder, DPRQuestionEncoder
@@ -119,11 +120,8 @@ class ORConvQARetriever(NeuralRetrieverPipelineStep):
         if len(questions) == 0:
             raise ValueError('The list of questions should contain at least one question')
 
-        w = 3
-        if len(questions) > w:
-            return '[CLS]' + questions[0] + "[SEP]" + "[SEP]".join(questions[-w:]) + "[SEP]"
+        return conversational_question_formatter(questions, True, 1)
 
-        return '[CLS]' + "[SEP]".join(questions) + "[SEP]"
 
     def _tensorizer(self, tokenizer: Union[AlbertTokenizer],
                     text: List[str],

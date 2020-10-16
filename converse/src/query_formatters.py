@@ -1,3 +1,8 @@
+"""Standard query formatters
+
+This file contains query formatters which can easily be used through the platform.
+"""
+
 from typing import List
 
 
@@ -14,7 +19,7 @@ def conversational_question_formatter(questions: List[str], prepend_initial_ques
     # Plus one, because the new question should have been added to the list of questions. So if the user wants a
     # history of two, then the number of question needed are two + the current question, which makes 3 in total.
     h = history_window + 1
-    questions_to_take_into_account = questions[h:]
+    questions_to_take_into_account = questions[-h:]
 
     # optionally prepend initial question
     initial_question_was_included = len(questions_to_take_into_account) < len(questions)
@@ -25,3 +30,5 @@ def conversational_question_formatter(questions: List[str], prepend_initial_ques
     return '{0} {1} {2}'.format(question_close_token,
                                 token_with_spaces.join(questions_to_take_into_account),
                                 question_separator_token)
+
+print(conversational_question_formatter(['1','2','3','4','5'], False, 0))
