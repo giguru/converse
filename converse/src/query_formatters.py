@@ -30,5 +30,3 @@ def conversational_question_formatter(questions: List[str], prepend_initial_ques
     return '{0} {1} {2}'.format(question_close_token,
                                 token_with_spaces.join(questions_to_take_into_account),
                                 question_separator_token)
-
-print(conversational_question_formatter(['1','2','3','4','5'], False, 0))
