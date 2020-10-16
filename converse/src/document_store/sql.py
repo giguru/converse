@@ -96,15 +96,6 @@ class SQLDocumentStore(BaseDocumentStore):
         documents = [self._convert_sql_row_to_document(row) for row in query.all()]
         return documents
 
-    def get_total_number_of_documents(
-            self, index: Optional[str] = None, filters: Optional[Dict[str, List[str]]] = None
-    ) -> int:
-        index = index or self.index
-        query = self.__get_query_for_documents(index=index, filters=filters)
-        total = len(query.all())
-        del query
-        return total
-
     def get_batch_of_documents(
             self,
             index: Optional[str] = None,
@@ -122,7 +113,6 @@ class SQLDocumentStore(BaseDocumentStore):
         index = index or self.label_index
         label_rows = self.session.query(LabelORM).filter_by(index=index).all()
         labels = [self._convert_sql_row_to_label(row) for row in label_rows]
-
         return labels
 
     def write_documents(self, documents: Union[List[dict], List[Document]], index: Optional[str] = None):

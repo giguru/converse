@@ -144,7 +144,7 @@ class FAISSDocumentStore(SQLDocumentStore):
 
         index = index or self.index
 
-        total_number_of_documents = self.get_total_number_of_documents(index=index)
+        total_number_of_documents = self.get_document_count(index=index)
         if total_number_of_documents == 0:  # only check empty result on first iteration
             logger.warning("Calling DocumentStore.update_embeddings() on an empty index")
             self.faiss_index = None
