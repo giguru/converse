@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 logger.info('Creating document store...')
 document_store = FAISSDocumentStore(vector_dim=128)
 
-pf = '../datasets/predefined/orconvqa/'
+pf = 'datasets/predefined/orconvqa/'
 labels, documents = orconvqa_read_files(
     # Contains questions and answers (and a bunch of other things like history)
     filename=pf + 'preprocessed/dev.txt',
@@ -22,7 +22,7 @@ labels, documents = orconvqa_read_files(
     # We assume qrels is always correct for now
     buildCorpus=True,
     # "Block" file containing the raw text blocks and their ids
-    corpusFile=pf + 'document_blocks/all_blocks.txt')
+    corpusFile=pf + 'document_blocks/dev_blocks.txt')
 
 logger.info('Writing data into documents store...')
 

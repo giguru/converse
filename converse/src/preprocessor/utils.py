@@ -17,10 +17,6 @@ from converse.src.schema import Document, Label
 
 logger = logging.getLogger(__name__)
 
-# For testing purposes, use only N lines instead of using the entire corpus. This because creating embeddings for the
-# entire corpus takes a lot of time. The corpus contains ca. 65000 lines. Make the limit 0 (=zero) to use everything.
-LIMIT_ORCONVQA_CORPUS_LINES = 0
-
 def eval_data_from_file(filename: str) -> Tuple[List[Document], List[Label]]:
     """
     Read Documents + Labels from a SQuAD-style file.
@@ -233,18 +229,20 @@ def fetch_archive_from_http(url: str, output_dir: str, proxies: Optional[dict] =
         return True
 
 
-def orconvqa_build_corpus(filename: str) -> List[Document]:
+def orconvqa_build_corpus(filename: str, limit_lines: int = 0) -> List[Document]:
     """
-        :param filename - Name of json file containing the text blocks, each line should be in json format and contain
-            at least a 'text' and 'id' entry
-
-        :return: List of Documents
+    :param filename - Name of json file containing the text blocks, each line should be in json format and contain
+        at least a 'text' and 'id' entry
+    :param limit_lines - For testing purposes, use only N lines instead of using the entire corpus.
+        This because creating embeddings for the entire development corpus takes a lot of time. The corpus
+        contains ca. 65000 lines. Make the limit 0 (=zero) to use everything.
+    :return: List of Documents
     """
 
     docs = []
     with open(filename, 'r') as file:
         for idx, block in enumerate(file.readlines()):
-            if 0 < LIMIT_ORCONVQA_CORPUS_LINES <= idx:
+            if 0 < limit_lines <= idx:
                 # stop reading lines.
                 break
             try:

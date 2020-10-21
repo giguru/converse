@@ -71,7 +71,9 @@ converse.print_eval_results(eval_results)
 
 
 ### Example script
-Their is a working script on the folder examples/test.py.
+Their is a working script ``test.py``.
+
+*N.B. running this test script took 5 hours on a Macbook Pro 2020 with 16GB 3733GHz RAM and a 2 GHz Quad-Core Intel Core i5.*   
 
 <a name="acknowledgement"></a>
 ## Acknowledgement
