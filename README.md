@@ -1,17 +1,34 @@
 # Converse
-Converse is a Information Retrieval framework focused on Conversational Search built from [Haystack](https://github.com/deepset-ai/haystack) version
-Sep 2020  (not around).
+Converse is a Information Retrieval framework for researching Conversational Search. It was built from
+[Haystack](https://github.com/deepset-ai/haystack) version Sep 2020  (not around). Haystack is a framework for
+modelling Question-Answering system. If that is what you are looking for, please pay them a visit as well!
 
 ## Contents
-1. [Get started.](#getstarted)
-2. [How to use.](#howtouse)
-3. [Acknowledgement.](#acknowledgement)
+1. [Architecture](#architecture)
+2. [Get started.](#getstarted)
+3. [How to use.](#howtouse)
+4. [Acknowledgement.](#acknowledgement)
+
+<a name="architecture"></a>
+## Architecture
+
+ConverSE supports pipelines with the following architecture:
+
+![ConverSE architecture](images/architecture.jpeg)
+
+A pipeline is built from N instances of `RetrieverPipelineStep` which return a list of `Document` instances. Its
+`retrieve` function takes questions and optionally the results of the previous `RetrieverPipelineStep`. At the end
+of the pipeline, there is a rader which returns a list instances of `PredictionResult`. 
 
 <a name="getstarted"></a>
 ## Get started
-To get started, all you need to do is install this package via pip:
+
+Converse was built with Python 3.7. 
+
+To get started, all you need to do is install this package and its dependencies via pip:
 ```
-pip install git+https://github.com/giguru/converse 
+pip3 install git+https://github.com/giguru/converse
+pip3 install -r requirements.txt 
 ```
 
 The repository comes with a development data set. If you want to have a test data set, please run the following command
@@ -45,7 +62,7 @@ document_store.write_labels(labels)
 ```
 
 ### Define your components
-Then define your retriever and reader
+Then define your retriever and reader.
 ```python
 retriever = ORConvQARetriever(
     document_store=document_store,
@@ -61,11 +78,16 @@ document_store.update_embeddings(retriever)
 reader = FARMReader(model_name_or_path="converse/models/orconvqa/BertForORConvQAReader", use_gpu=True, num_processes=2)
 ``` 
 
+ConverSE comes with several retrievers, which can be found in folder /converse/src/retriever/.
+Readers can be found in /converse/src/reader/
+
 ### Tie it together and evaluate
+A keen eye notices that `retriever` is provided to `Converse` in a list. You can add multiple  
 ```python
 converse = Converse(reader, [retriever])
 
 eval_results = converse.eval(top_k_retriever=1, top_k_reader=10)
+
 converse.print_eval_results(eval_results)
 ```
 
