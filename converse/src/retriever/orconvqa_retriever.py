@@ -120,7 +120,7 @@ class ORConvQARetriever(NeuralRetrieverPipelineStep):
         if len(questions) == 0:
             raise ValueError('The list of questions should contain at least one question')
 
-        return conversational_question_formatter(questions, True, 1)
+        return conversational_question_formatter(questions)
 
 
     def _tensorizer(self, tokenizer: Union[AlbertTokenizer],

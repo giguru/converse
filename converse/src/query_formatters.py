@@ -10,7 +10,7 @@ question_close_token = '<CLS>'  # From BERT without surrounding spaces
 question_separator_token = '<SEP>'  # From BERT without surrounding spaces
 
 
-def conversational_question_formatter(questions: List[str], prepend_initial_question: bool, history_window: int):
+def conversational_question_formatter(questions: List[str], prepend_initial_question: bool = True, history_window: int = 6):
     """
     In the paper Open-retrieval Conversational Question Answering, the question string provided to
     the retriever/reader is formatted by concatenating the current question with historical question

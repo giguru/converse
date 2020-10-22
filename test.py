@@ -32,6 +32,10 @@ del documents  # Free memory
 document_store.write_labels(labels)
 del labels  # Free memory
 
+logger.info('Setting up reader...')
+# Load a local model or any of the QA models on Hugging Face's model hub (https://huggingface.co/models)
+reader = FARMReader(model_name_or_path="converse/models/orconvqa/BertForORConvQAReader", use_gpu=True, num_processes=2)
+
 logger.info('Setting up retriever...')
 retriever = ORConvQARetriever(
     document_store=document_store,
@@ -43,10 +47,6 @@ retriever = ORConvQARetriever(
 )
 logger.info('Update embeddings...')
 document_store.update_embeddings(retriever)
-
-logger.info('Setting up reader...')
-# Load a local model or any of the QA models on Hugging Face's model hub (https://huggingface.co/models)
-reader = FARMReader(model_name_or_path="converse/models/orconvqa/BertForORConvQAReader", use_gpu=True, num_processes=2)
 
 converse = Converse(reader, [retriever])
 
