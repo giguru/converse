@@ -22,7 +22,7 @@ labels, documents = orconvqa_read_files(
     # We assume qrels is always correct for now
     buildCorpus=True,
     # "Block" file containing the raw text blocks and their ids
-    corpusFile=pf + 'document_blocks/all_blocks.txt')
+    corpusFile=pf + 'document_blocks/dev_blocks.txt')
 
 logger.info('Writing data into documents store...')
 
