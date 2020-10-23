@@ -62,8 +62,8 @@ class ORConvQARetriever(NeuralRetrieverPipelineStep):
         self.remove_sep_tok_from_untitled_passages = remove_sep_tok_from_untitled_passages
 
         # Load pretrained retrievers
-        binary_dir = './converse/models/orconvqa/checkpoint-5917'
-        token_dir = './converse/models/orconvqa'
+        binary_dir = './converse/models/orconvqa/pipeline_checkpoint/checkpoint-45000/retriever'
+        token_dir = './converse/models/orconvqa/retriever_checkpoint'
 
         self.query_encoder = AlbertForRetrieverOnlyPositivePassage.from_pretrained(binary_dir, force_download=True).to(self.device)
         self.query_tokenizer = AlbertTokenizer.from_pretrained(token_dir)
