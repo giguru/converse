@@ -138,6 +138,7 @@ class Converse:
         :param top_k_reader: How many answers to return per question
         :type top_k_reader: int
         """
+        logger.info(f"Evaluating a Converse pipeline with top_k_retriever={top_k_retriever} and top_k_reader={top_k_reader}")
         self.__check_both_elements()
 
         finder_start_time = time.time()

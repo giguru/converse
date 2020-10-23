@@ -14,6 +14,7 @@ from farm.data_handler.utils import http_get
 from haystack.file_converter.pdf import PDFToTextConverter
 from haystack.file_converter.tika import TikaConverter
 from converse.src.schema import Document, Label
+from file_manager.manager import check_and_rewrite_file_path
 
 logger = logging.getLogger(__name__)
 
@@ -283,6 +284,7 @@ def orconvqa_read_files(filename: str, qrelsfile: str, buildCorpus: bool = False
         qrels = json.load(f)
 
     labels = []
+    # filename = check_and_rewrite_file_path(filename)
 
     with open(filename, "r") as file:
         for question in file.readlines():
