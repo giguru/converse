@@ -53,10 +53,13 @@ class ORConvQARetriever(NeuralRetrieverPipelineStep):
         self.batch_size = batch_size
         self.max_seq_len = max_seq_len
 
+
         if use_gpu and torch.cuda.is_available():
             self.device = torch.device("cuda")
+            device_used = "GPU"
         else:
             self.device = torch.device("cpu")
+            device_used = "CPU"
 
         self.embed_title = embed_title
         self.remove_sep_tok_from_untitled_passages = remove_sep_tok_from_untitled_passages
@@ -70,6 +73,7 @@ class ORConvQARetriever(NeuralRetrieverPipelineStep):
 
         self.passage_tokenizer = AlbertTokenizer.from_pretrained(token_dir)
         self.passage_encoder = AlbertForRetrieverOnlyPositivePassage.from_pretrained(binary_dir, force_download=True).to(self.device)
+        logger.info(f"ORConvQARetriever initialised with {type(document_store).__name__} Document Store, torch using {device_used} and model found in location {binary_dir} and tokenizer in location {token_dir}. The batch_size is {batch_size} and the max_seq_len is {max_seq_len}.")
 
 
     def retrieve(self, questions: List[str], previous_documents: List[Document], filters: dict = None, top_k: int = 10) -> List[Document]:

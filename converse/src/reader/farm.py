@@ -104,6 +104,8 @@ class FARMReader(BaseReader):
             logger.warning("Could not set `top_k_per_sample` in FARM. Please update FARM version.")
         self.max_seq_len = max_seq_len
         self.use_gpu = use_gpu
+        device_used = "GPU" if use_gpu else "CPU"
+        logger.info(f"Farm reader initialised with the model {model_name_or_path} using the {device_used}. Args: top_k_per_candidate={top_k_per_candidate}, top_k_per_sample={top_k_per_sample} ")
 
     def train(
         self,
