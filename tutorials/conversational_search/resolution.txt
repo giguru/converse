@@ -1,0 +1,175 @@
+Reformulator Log
+---------------
+{'query': 'What is throat cancer? ', 'qid': '', 'original_query': 'What is throat cancer?'}
+{'query': 'Is it treatable? ', 'qid': '', 'original_query': 'Is it treatable?'}
+{'query': 'Tell me about lung cancer. cancer lung', 'qid': '', 'original_query': 'Tell me about lung cancer.'}
+{'query': 'What are its symptoms?  throat cancer about lung', 'qid': '', 'original_query': 'What are its symptoms? '}
+{'query': 'Can it spread to the throat? throat cancer about lung', 'qid': '', 'original_query': 'Can it spread to the throat?'}
+{'query': 'What causes throat cancer? throat cancer lung', 'qid': '', 'original_query': 'What causes throat cancer?'}
+{'query': 'What is the first sign of it? causes throat lung cancer about', 'qid': '', 'original_query': 'What is the first sign of it?'}
+{'query': 'Is it the same as esophageal cancer? causes throat lung cancer about es', 'qid': '', 'original_query': 'Is it the same as esophageal cancer?'}
+{'query': "What's the difference in their symptoms? causes throat lung cancer about es", 'qid': '', 'original_query': "What's the difference in their symptoms?"}
+{'query': 'What are the different types of sharks? ', 'qid': '', 'original_query': 'What are the different types of sharks?'}
+{'query': 'What do they eat? sharks', 'qid': '', 'original_query': 'What do they eat?'}
+{'query': 'How do they compare with tigers for being dangerous? sharks', 'qid': '', 'original_query': 'How do they compare with tigers for being dangerous?'}
+{'query': 'Are sharks endangered?  If so, which species? sharks', 'qid': '', 'original_query': 'Are sharks endangered?  If so, which species?'}
+{'query': 'Tell me more about tiger sharks. tiger sharks', 'qid': '', 'original_query': 'Tell me more about tiger sharks.'}
+{'query': 'What is the largest ever to have lived on Earth? sharks', 'qid': '', 'original_query': 'What is the largest ever to have lived on Earth?'}
+{'query': "What's the biggest ever caught? sharks", 'qid': '', 'original_query': "What's the biggest ever caught?"}
+{'query': 'What about for great whites? sharks', 'qid': '', 'original_query': 'What about for great whites?'}
+{'query': 'Tell me about makos. sharks', 'qid': '', 'original_query': 'Tell me about makos.'}
+{'query': 'What are their adaptations? sharks', 'qid': '', 'original_query': 'What are their adaptations?'}
+{'query': 'Where do they live? sharks', 'qid': '', 'original_query': 'Where do they live?'}
+{'query': 'Tell me about the Neverending Story film. ', 'qid': '', 'original_query': 'Tell me about the Neverending Story film.'}
+{'query': 'What is it about? ##ending never', 'qid': '', 'original_query': 'What is it about?'}
+{'query': 'How was it received? ##ending never', 'qid': '', 'original_query': 'How was it received?'}
+{'query': 'Did it win any awards? ##ending never', 'qid': '', 'original_query': 'Did it win any awards?'}
+{'query': 'Was it a book first? ##ending never', 'qid': '', 'original_query': 'Was it a book first?'}
+{'query': 'Who was the author and when what it published? ##ending never', 'qid': '', 'original_query': 'Who was the author and when what it published?'}
+{'query': 'What are the main themes? ##ending never', 'qid': '', 'original_query': 'What are the main themes?'}
+{'query': 'Who are the main characters? ##ending never', 'qid': '', 'original_query': 'Who are the main characters?'}
+{'query': 'Tell me about the Bronze Age collapse. bronze', 'qid': '', 'original_query': 'Tell me about the Bronze Age collapse.'}
+{'query': 'What is the evidence for it? collapse bronze age', 'qid': '', 'original_query': 'What is the evidence for it?'}
+{'query': 'What are some of the possible causes? collapse bronze age', 'qid': '', 'original_query': 'What are some of the possible causes?'}
+{'query': 'Who were the Sea Peoples? collapse bronze age', 'qid': '', 'original_query': 'Who were the Sea Peoples?'}
+{'query': 'What was their role in it? collapse bronze age', 'qid': '', 'original_query': 'What was their role in it?'}
+{'query': 'What other factors led to a breakdown of trade? bronze age', 'qid': '', 'original_query': 'What other factors led to a breakdown of trade?'}
+{'query': 'What about environmental factors? bronze age', 'qid': '', 'original_query': 'What about environmental factors?'}
+{'query': 'What empires survived? bronze age', 'qid': '', 'original_query': 'What empires survived?'}
+{'query': 'What was the Stanford Experiment? stanford', 'qid': '', 'original_query': 'What was the Stanford Experiment?'}
+{'query': 'What did it show? experiment stanford', 'qid': '', 'original_query': 'What did it show?'}
+{'query': 'Tell me about the author of the experiment. experiment stanford', 'qid': '', 'original_query': 'Tell me about the author of the experiment.'}
+{'query': 'Was it ethical? experiment stanford', 'qid': '', 'original_query': 'Was it ethical?'}
+{'query': 'What are other similar experiments? experiment stanford', 'qid': '', 'original_query': 'What are other similar experiments?'}
+{'query': 'What happened in the Milgram experiment? mil ##gram stanford', 'qid': '', 'original_query': 'What happened in the Milgram experiment?'}
+{'query': 'Why was it important? mil experiment ##gram', 'qid': '', 'original_query': 'Why was it important?'}
+{'query': 'What were the similarities and differences between the studies? experiments experiment mil ##gram stanford', 'qid': '', 'original_query': 'What were the similarities and differences between the studies?'}
+{'query': 'What are the origins of popular music?  ', 'qid': '', 'original_query': 'What are the origins of popular music? '}
+{'query': 'What are its characteristics? popular', 'qid': '', 'original_query': 'What are its characteristics?'}
+{'query': 'What technological developments enabled it? music popular', 'qid': '', 'original_query': 'What technological developments enabled it?'}
+{'query': 'When and why did people start taking pop seriously?  pop', 'qid': '', 'original_query': 'When and why did people start taking pop seriously? '}
+{'query': 'How has it been integrated into music education?  music pop popular', 'qid': '', 'original_query': 'How has it been integrated into music education? '}
+{'query': 'Describe some of the influential pop bands. music pop', 'qid': '', 'original_query': 'Describe some of the influential pop bands.'}
+{'query': 'What makes a song pop punk? pop', 'qid': '', 'original_query': 'What makes a song pop punk?'}
+{'query': 'What is the difference between it and emo? pop', 'qid': '', 'original_query': 'What is the difference between it and emo?'}
+{'query': 'How was Netflix started?  ', 'qid': '', 'original_query': 'How was Netflix started? '}
+{'query': 'How did it originally work? ', 'qid': '', 'original_query': 'How did it originally work?'}
+{'query': 'What is its relationship with Blockbuster? netflix blockbuster', 'qid': '', 'original_query': 'What is its relationship with Blockbuster?'}
+{'query': 'When did Netflix shift from DVDs to a streaming service? netflix', 'qid': '', 'original_query': 'When did Netflix shift from DVDs to a streaming service?'}
+{'query': 'What are its other competitors? netflix', 'qid': '', 'original_query': 'What are its other competitors?'}
+{'query': 'How does it compare to Amazon Prime Video? netflix', 'qid': '', 'original_query': 'How does it compare to Amazon Prime Video?'}
+{'query': 'Describe it’s subscriber growth over time. netflix', 'qid': '', 'original_query': 'Describe it’s subscriber growth over time.'}
+{'query': 'How has it changed the way TV is watched? netflix', 'qid': '', 'original_query': 'How has it changed the way TV is watched?'}
+{'query': 'What was the first artificial satellite? ', 'qid': '', 'original_query': 'What was the first artificial satellite?'}
+{'query': 'What are the types of orbits? ', 'qid': '', 'original_query': 'What are the types of orbits?'}
+{'query': 'What are the important classes of satellite? satellite', 'qid': '', 'original_query': 'What are the important classes of satellite?'}
+{'query': 'How do navigation systems work? ', 'qid': '', 'original_query': 'How do navigation systems work?'}
+{'query': 'What is the Galileo system and why is it important? system galileo', 'qid': '', 'original_query': 'What is the Galileo system and why is it important?'}
+{'query': 'Why did it create tension with the US? system galileo satellite', 'qid': '', 'original_query': 'Why did it create tension with the US?'}
+{'query': 'What are Cubesats? ', 'qid': '', 'original_query': 'What are Cubesats?'}
+{'query': 'What are their advantages? satellite cube', 'qid': '', 'original_query': 'What are their advantages?'}
+{'query': 'What is worth seeing in Washington D.C.? washington', 'qid': '', 'original_query': 'What is worth seeing in Washington D.C.?'}
+{'query': 'Which Smithsonian museums are the most popular? smithsonian', 'qid': '', 'original_query': 'Which Smithsonian museums are the most popular?'}
+{'query': 'Why is the National Air and Space Museum important? national museum air space', 'qid': '', 'original_query': 'Why is the National Air and Space Museum important?'}
+{'query': 'Is the Spy Museum free? ', 'qid': '', 'original_query': 'Is the Spy Museum free?'}
+{'query': 'What is there to do in DC after the museums close? ', 'qid': '', 'original_query': 'What is there to do in DC after the museums close?'}
+{'query': 'What is the best time to visit the reflecting pools? reflecting', 'qid': '', 'original_query': 'What is the best time to visit the reflecting pools?'}
+{'query': 'Are there any famous foods? ', 'qid': '', 'original_query': 'Are there any famous foods?'}
+{'query': 'What is a DC half smoke? dc', 'qid': '', 'original_query': 'What is a DC half smoke?'}
+{'query': 'Tell me about its history. dc', 'qid': '', 'original_query': 'Tell me about its history.'}
+{'query': 'What is Darwin’s theory in a nutshell? darwin', 'qid': '', 'original_query': 'What is Darwin’s theory in a nutshell?'}
+{'query': 'How was it developed? ', 'qid': '', 'original_query': 'How was it developed?'}
+{'query': 'How do sexual and asexual reproduction affect it? theory darwin', 'qid': '', 'original_query': 'How do sexual and asexual reproduction affect it?'}
+{'query': 'How can fossils be used to understand it? theory darwin', 'qid': '', 'original_query': 'How can fossils be used to understand it?'}
+{'query': 'What is modern evidence for it?  theory darwin', 'qid': '', 'original_query': 'What is modern evidence for it? '}
+{'query': 'What is the impact on modern biology? theory darwin', 'qid': '', 'original_query': 'What is the impact on modern biology?'}
+{'query': 'Compare and contrast microevolution and macroevolution. theory darwin', 'qid': '', 'original_query': 'Compare and contrast microevolution and macroevolution.'}
+{'query': 'What is the relationship to speciation? theory darwin', 'qid': '', 'original_query': 'What is the relationship to speciation?'}
+{'query': 'What is a real-time database? ', 'qid': '', 'original_query': 'What is a real-time database?'}
+{'query': 'How does it differ from traditional ones? time database', 'qid': '', 'original_query': 'How does it differ from traditional ones?'}
+{'query': 'What are the advantages of real-time processing? database', 'qid': '', 'original_query': 'What are the advantages of real-time processing?'}
+{'query': 'What are examples of important ones? time real database', 'qid': '', 'original_query': 'What are examples of important ones?'}
+{'query': 'What are important applications? time real database', 'qid': '', 'original_query': 'What are important applications?'}
+{'query': 'What are important cloud options? time real database', 'qid': '', 'original_query': 'What are important cloud options?'}
+{'query': 'Tell me about the Firebase DB. fire', 'qid': '', 'original_query': 'Tell me about the Firebase DB.'}
+{'query': 'How is it used in mobile apps? fire database', 'qid': '', 'original_query': 'How is it used in mobile apps?'}
+{'query': 'Which weekend sports have the most injuries? ', 'qid': '', 'original_query': 'Which weekend sports have the most injuries?'}
+{'query': 'What are the most common types of injuries? ', 'qid': '', 'original_query': 'What are the most common types of injuries?'}
+{'query': 'What is the ACL? ', 'qid': '', 'original_query': 'What is the ACL?'}
+{'query': 'What is an injury for it? ac', 'qid': '', 'original_query': 'What is an injury for it?'}
+{'query': 'Tell me about the RICE method. ac', 'qid': '', 'original_query': 'Tell me about the RICE method.'}
+{'query': 'Is there disagreement about it? ac rice the', 'qid': '', 'original_query': 'Is there disagreement about it?'}
+{'query': 'What is arnica used for? is', 'qid': '', 'original_query': 'What is arnica used for?'}
+{'query': 'What are some ways to avoid injury? ac', 'qid': '', 'original_query': 'What are some ways to avoid injury?'}
+{'query': 'Who are The Avengers? avengers', 'qid': '', 'original_query': 'Who are The Avengers?'}
+{'query': 'Tell me about their first appearance. ', 'qid': '', 'original_query': 'Tell me about their first appearance.'}
+{'query': 'Who is the most powerful and why?  avengers', 'qid': '', 'original_query': 'Who is the most powerful and why? '}
+{'query': 'What is the relationship of Spider-Man to the team? avengers', 'qid': '', 'original_query': 'What is the relationship of Spider-Man to the team?'}
+{'query': 'Why is Batman not a member?  avengers', 'qid': '', 'original_query': 'Why is Batman not a member? '}
+{'query': 'What is an important team in the DC universe? avengers', 'qid': '', 'original_query': 'What is an important team in the DC universe?'}
+{'query': 'Tell me about the origins of the Justice League. ', 'qid': '', 'original_query': 'Tell me about the origins of the Justice League.'}
+{'query': 'Who are the important members? justice league', 'qid': '', 'original_query': 'Who are the important members?'}
+{'query': 'Why is blood red? ', 'qid': '', 'original_query': 'Why is blood red?'}
+{'query': 'What foods contain high levels of iron? ', 'qid': '', 'original_query': 'What foods contain high levels of iron?'}
+{'query': 'What improves absorption? ', 'qid': '', 'original_query': 'What improves absorption?'}
+{'query': 'What are red blood cells? ', 'qid': '', 'original_query': 'What are red blood cells?'}
+{'query': 'How are they created? blood red', 'qid': '', 'original_query': 'How are they created?'}
+{'query': 'How is oxygen transported? blood cells red', 'qid': '', 'original_query': 'How is oxygen transported?'}
+{'query': 'What is anemia? blood cells red', 'qid': '', 'original_query': 'What is anemia?'}
+{'query': 'What are the symptoms? ', 'qid': '', 'original_query': 'What are the symptoms?'}
+{'query': 'Can it go away? an', 'qid': '', 'original_query': 'Can it go away?'}
+{'query': 'What are its possible causes? an', 'qid': '', 'original_query': 'What are its possible causes?'}
+{'query': 'How is it treated? blood an', 'qid': '', 'original_query': 'How is it treated?'}
+{'query': 'What is cuisine is Emilia-Romagna famous for? ', 'qid': '', 'original_query': 'What is cuisine is Emilia-Romagna famous for?'}
+{'query': 'What is the history of tagliatelle al ragu bolognese? ', 'qid': '', 'original_query': 'What is the history of tagliatelle al ragu bolognese?'}
+{'query': 'What are its common variations? ##lia ##tell of emilia roma', 'qid': '', 'original_query': 'What are its common variations?'}
+{'query': 'Tell me about cooking schools and classes. ', 'qid': '', 'original_query': 'Tell me about cooking schools and classes.'}
+{'query': 'What are famous foods from the region? emilia roma', 'qid': '', 'original_query': 'What are famous foods from the region?'}
+{'query': 'Describe the traditional process for making balsamic vinegar? emilia roma', 'qid': '', 'original_query': 'Describe the traditional process for making balsamic vinegar?'}
+{'query': 'What is mortadella and where is it from? making', 'qid': '', 'original_query': 'What is mortadella and where is it from?'}
+{'query': 'What’s the difference with Bologna? emilia roma', 'qid': '', 'original_query': 'What’s the difference with Bologna?'}
+{'query': 'Where was Parmesan cheese created? emilia roma', 'qid': '', 'original_query': 'Where was Parmesan cheese created?'}
+{'query': 'What is done with the whey after production? ', 'qid': '', 'original_query': 'What is done with the whey after production?'}
+{'query': 'What are typical pasta dishes? emilia roma', 'qid': '', 'original_query': 'What are typical pasta dishes?'}
+{'query': 'How do you sleep after jet lag? ', 'qid': '', 'original_query': 'How do you sleep after jet lag?'}
+{'query': 'How about for anxiety? ', 'qid': '', 'original_query': 'How about for anxiety?'}
+{'query': 'Does melatonin help? ', 'qid': '', 'original_query': 'Does melatonin help?'}
+{'query': 'How was it discovered? does', 'qid': '', 'original_query': 'How was it discovered?'}
+{'query': 'What are good sources in food? does', 'qid': '', 'original_query': 'What are good sources in food?'}
+{'query': 'Is melatonin bad for you? ? does', 'qid': '', 'original_query': 'Is melatonin bad for you?'}
+{'query': 'What are the side effects? food does', 'qid': '', 'original_query': 'What are the side effects?'}
+{'query': 'Why does it require a prescription in the UK? food does', 'qid': '', 'original_query': 'Why does it require a prescription in the UK?'}
+{'query': 'How can I increase my levels naturally? food does', 'qid': '', 'original_query': 'How can I increase my levels naturally?'}
+{'query': 'Is it effective for treating insomnia? food does', 'qid': '', 'original_query': 'Is it effective for treating insomnia?'}
+{'query': 'Why do turkey and Turkey share the same name? turkey', 'qid': '', 'original_query': 'Why do turkey and Turkey share the same name?'}
+{'query': 'Where are turkeys from? turkey', 'qid': '', 'original_query': 'Where are turkeys from?'}
+{'query': 'What was their importance in native cultures? turkey', 'qid': '', 'original_query': 'What was their importance in native cultures?'}
+{'query': 'When and how were they domesticated? turkey', 'qid': '', 'original_query': 'When and how were they domesticated?'}
+{'query': 'Can they fly? turkey', 'qid': '', 'original_query': 'Can they fly?'}
+{'query': 'Why did Ben Franklin want it to be the national symbol? turkey', 'qid': '', 'original_query': 'Why did Ben Franklin want it to be the national symbol?'}
+{'query': 'Why is it eaten on Thanksgiving? turkey', 'qid': '', 'original_query': 'Why is it eaten on Thanksgiving?'}
+{'query': "What's the difference between soup and stew? difference soup", 'qid': '', 'original_query': "What's the difference between soup and stew?"}
+{'query': 'Is chilli a stew? sep', 'qid': '', 'original_query': 'Is chilli a stew?'}
+{'query': 'How about goulash? ', 'qid': '', 'original_query': 'How about goulash?'}
+{'query': 'What are popular ones in France? ', 'qid': '', 'original_query': 'What are popular ones in France?'}
+{'query': 'How is cassoulet made? france', 'qid': '', 'original_query': 'How is cassoulet made?'}
+{'query': 'Tell me about feijoada and its significance. ##let', 'qid': '', 'original_query': 'Tell me about feijoada and its significance.'}
+{'query': 'How is it similar or different from cassoulet? ', 'qid': '', 'original_query': 'How is it similar or different from cassoulet?'}
+{'query': 'Tell about Bigos stew. ', 'qid': '', 'original_query': 'Tell about Bigos stew.'}
+{'query': 'What is the keto diet? ', 'qid': '', 'original_query': 'What is the keto diet?'}
+{'query': 'Why was it original developed? ke ##to', 'qid': '', 'original_query': 'Why was it original developed?'}
+{'query': 'What is ketosis? is ke', 'qid': '', 'original_query': 'What is ketosis?'}
+{'query': 'What is paleo? ', 'qid': '', 'original_query': 'What is paleo?'}
+{'query': 'What do they have in common? ', 'qid': '', 'original_query': 'What do they have in common?'}
+{'query': 'How are they different? ', 'qid': '', 'original_query': 'How are they different?'}
+{'query': 'What is intermittent fasting? ', 'qid': '', 'original_query': 'What is intermittent fasting?'}
+{'query': 'How is it related to keto? what ##to', 'qid': '', 'original_query': 'How is it related to keto?'}
+{'query': 'What is taught in sociology? ', 'qid': '', 'original_query': 'What is taught in sociology?'}
+{'query': 'What is the main contribution of Auguste Comte? auguste comte', 'qid': '', 'original_query': 'What is the main contribution of Auguste Comte?'}
+{'query': 'What is the role of positivism in it? sociology', 'qid': '', 'original_query': 'What is the role of positivism in it?'}
+{'query': 'What is Herbert Spencer known for? sociology', 'qid': '', 'original_query': 'What is Herbert Spencer known for?'}
+{'query': 'How is his work related to Comte? is what', 'qid': '', 'original_query': 'How is his work related to Comte?'}
+{'query': 'What is the functionalist theory? ', 'qid': '', 'original_query': 'What is the functionalist theory?'}
+{'query': 'What is its main criticism? is the', 'qid': '', 'original_query': 'What is its main criticism?'}
+{'query': 'How does it compare to conflict theory? is', 'qid': '', 'original_query': 'How does it compare to conflict theory?'}
+{'query': 'What are modern examples of conflict theory? ', 'qid': '', 'original_query': 'What are modern examples of conflict theory?'}

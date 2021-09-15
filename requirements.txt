@@ -1,0 +1,43 @@
+farm==0.8.0
+--find-links=https://download.pytorch.org/whl/torch_stable.html
+fastapi
+uvicorn
+gunicorn
+pandas
+sklearn
+psycopg2-binary; sys_platform != 'win32' and sys_platform != 'cygwin'
+elasticsearch>=7.7,<=7.10
+elastic-apm
+tox
+coverage
+langdetect # for PDF conversions
+# optional: sentence-transformers
+python-multipart
+python-docx
+sqlalchemy>=1.4.2
+sqlalchemy_utils
+# torch==1.8.1+cu111
+# for using FAISS with GPUs, install faiss-gpu
+faiss-gpu>=1.6.3
+tika
+uvloop==0.14; sys_platform != 'win32' and sys_platform != 'cygwin'
+httptools
+nltk
+more_itertools
+networkx
+# Refer milvus version support matrix at https://github.com/milvus-io/pymilvus#install-pymilvus
+pymilvus
+# Optional: For crawling
+#selenium
+#webdriver-manager
+SPARQLWrapper
+mmh3
+weaviate-client
+
+spacy
+pytrec-eval>=0.5
+
+# Optional: For AnseriniRetriever
+pyserini==0.13.0
+# Optional: For TerrierRetriever
+python-terrier

@@ -1,0 +1,129 @@
+ERROR: Cannot install farm==0.7.1 and torch==1.8.1+cu111 because these package versions have conflicting dependencies.
+
+The conflict is caused by:
+    The user requested torch==1.8.1+cu111
+    farm 0.7.1 depends on torch<1.8 and >1.5
+
+To fix this you could try to:
+1. loosen the range of package versions you've specified
+2. remove package versions to allow pip attempt to solve the dependency conflict
+
+ERROR: ResolutionImpossible: for help visit https://pip.pypa.io/en/latest/user_guide/#fixing-conflicting-dependencies
+cp: -r not specified; omitting directory '/home/gscheuer/converse_haystack/cache'
+cp: -r not specified; omitting directory '/home/gscheuer/converse_haystack/haystack'
+cp: -r not specified; omitting directory '/home/gscheuer/converse_haystack/mlruns'
+cp: -r not specified; omitting directory '/home/gscheuer/converse_haystack/output'
+cp: -r not specified; omitting directory '/home/gscheuer/converse_haystack/saved_models'
+cp: -r not specified; omitting directory '/home/gscheuer/converse_haystack/tutorials'
+06/16/2021 19:25:17 - INFO - faiss.loader -   Loading faiss with AVX2 support.
+06/16/2021 19:25:17 - INFO - faiss.loader -   Loading faiss.
+06/16/2021 19:25:18 - INFO - farm.modeling.prediction_head -   Better speed can be achieved with apex installed from https://www.github.com/nvidia/apex .
+06/16/2021 19:25:21 - INFO - __main__ -   True 1
+06/16/2021 19:25:34 - INFO - haystack.query_rewriting.query_resolution -   QueryResolution model device=cuda, config=BertConfig {
+  "architectures": [
+    "BertForMaskedLM"
+  ],
+  "attention_probs_dropout_prob": 0.1,
+  "finetuning_task": "ner",
+  "gradient_checkpointing": false,
+  "hidden_act": "gelu",
+  "hidden_dropout_prob": 0.4,
+  "hidden_size": 1024,
+  "id2label": {
+    "0": "[PAD]",
+    "1": "O",
+    "2": "REL",
+    "3": "[CLS]",
+    "4": "[SEP]"
+  },
+  "initializer_range": 0.02,
+  "intermediate_size": 4096,
+  "label2id": {
+    "O": 1,
+    "REL": 2,
+    "[CLS]": 3,
+    "[PAD]": 0,
+    "[SEP]": 4
+  },
+  "layer_norm_eps": 1e-12,
+  "max_position_embeddings": 512,
+  "model_type": "bert",
+  "num_attention_heads": 16,
+  "num_hidden_layers": 24,
+  "pad_token_id": 0,
+  "position_embedding_type": "absolute",
+  "transformers_version": "4.6.0.dev0",
+  "type_vocab_size": 2,
+  "use_cache": true,
+  "vocab_size": 30522
+}
+
+06/16/2021 19:25:34 - INFO - haystack.query_rewriting.data_handler -   CanardProcessor with max_seq_len=300
+06/16/2021 19:25:40 - INFO - haystack.query_rewriting.query_resolution -   Training QueryResolution with batch_size=2, gradient_clipping=1.0, epsilon=1e-08, n_gpu=1, grad_acc_steps=2, evaluate_every=10000, early_stopping=None
+Preprocessing Dataset /home/gscheuer/converse_haystack/haystack/query_rewriting/canard/voskarides_preprocessed/train_gold_supervision.json:  10%|9         | 2000/20181 [02:41<24:27, 12.39 Dicts/s]
+Preprocessing Dataset /home/gscheuer/converse_haystack/haystack/query_rewriting/canard/voskarides_preprocessed/dev_gold_supervision.json:  20%|##        | 440/2196 [00:17<01:08, 25.60 Dicts/s]
+Preprocessing Dataset /home/gscheuer/converse_haystack/haystack/query_rewriting/canard/voskarides_preprocessed/test_gold_supervision.json:  20%|##        | 675/3373 [00:26<01:45, 25.62 Dicts/s]
+06/16/2021 19:29:05 - INFO - farm.modeling.optimization -   Loading optimizer `AdamW`: '{'correct_bias': True, 'weight_decay': 0.01, 'eps': 1e-08, 'no_decay': ['bias', 'LayerNorm.weight'], 'lr': 5e-05}'
+06/16/2021 19:29:10 - INFO - farm.modeling.optimization -   Using scheduler 'get_linear_schedule_with_warmup'
+06/16/2021 19:29:10 - INFO - farm.modeling.optimization -   Loading schedule `get_linear_schedule_with_warmup`: '{'num_warmup_steps': 1513.5, 'num_training_steps': 15135}'
+Train epoch 0/2 (Cur. train loss: 0.0943):  99%|#########9| 100/home/gscheuer/.local/lib/python3.7/site-packages/seqeval/metrics/sequence_labeling.py:43: UserWarning: [CLS] seems not to be NE tag.
+  warnings.warn('{} seems not to be NE tag.'.format(chunk))t/s]
+/home/gscheuer/.local/lib/python3.7/site-packages/seqeval/metrics/sequence_labeling.py:43: UserWarning: REL seems not to be NE tag.
+  warnings.warn('{} seems not to be NE tag.'.format(chunk))
+06/16/2021 21:07:28 - INFO - farm.eval -
+
+\\|//       \\|//      \\|//       \\|//     \\|//
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+***************************************************
+***** EVALUATION | DEV SET | AFTER 10000 BATCHES *****
+***************************************************
+\\|//       \\|//      \\|//       \\|//     \\|//
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+06/16/2021 21:07:28 - INFO - farm.eval -
+ _________ ner _________
+06/16/2021 21:07:28 - INFO - farm.eval -   loss: 0.07731437111164838
+06/16/2021 21:07:28 - INFO - farm.eval -   task_name: ner
+06/16/2021 21:07:29 - INFO - farm.eval -   micro_recall: 18.201409034397017
+06/16/2021 21:07:29 - INFO - farm.eval -   micro_precision: 100.0
+06/16/2021 21:07:29 - INFO - farm.eval -   micro_f1: 30.797279293177198
+06/16/2021 21:07:29 - INFO - farm.eval -   report:
+               precision    recall  f1-score   support
+
+        CLS]       1.00      1.00      1.00      2196
+          EL       0.00      0.00      0.00      7470
+
+   micro avg       1.00      0.23      0.37      9666
+   macro avg       0.50      0.50      0.50      9666
+weighted avg       0.23      0.23      0.23      9666
+
+Train epoch 0/2 (Cur. train loss: 0.0362): 100%|##########| 10091/10091 [1:39:15<00:00,  1.79it/s]
+Train epoch 1/2 (Cur. train loss: 0.0322):  98%|#########8| 99006/16/2021 23:04:57 - INFO - farm.eval -
+Evaluating: 100%|##########| 1098/1098 [01:59<00:00,  9.16it/s]
+\\|//       \\|//      \\|//       \\|//     \\|//
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+***************************************************
+***** EVALUATION | DEV SET | AFTER 20000 BATCHES *****
+***************************************************
+\\|//       \\|//      \\|//       \\|//     \\|//
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+06/16/2021 23:04:57 - INFO - farm.eval -
+ _________ ner _________
+06/16/2021 23:04:58 - INFO - farm.eval -   loss: 0.07130306273977016
+06/16/2021 23:04:58 - INFO - farm.eval -   task_name: ner
+06/16/2021 23:04:58 - INFO - farm.eval -   micro_recall: 37.74554496477414
+06/16/2021 23:04:58 - INFO - farm.eval -   micro_precision: 78.7208297320657
+06/16/2021 23:04:58 - INFO - farm.eval -   micro_f1: 51.025210084033624
+06/16/2021 23:04:58 - INFO - farm.eval -   report:
+               precision    recall  f1-score   support
+
+        CLS]       1.00      0.99      1.00      2196
+          EL       0.49      0.19      0.27      7470
+
+   micro avg       0.71      0.37      0.49      9666
+   macro avg       0.74      0.59      0.63      9666
+weighted avg       0.60      0.37      0.44      9666
+
+Train epoch 1/2 (Cur. train loss: 0.0958): 100%|##########| 10091/10091 [1:58:48<00:00,  1.34it/s]
+Train epoch 2/2 (Cur. train loss: 0.0208):  13%|#3        | 1347/10091 [17:28<1:55:04,  1.27it/s]slurmstepd: error: *** JOB 7762247 ON r30n7 CANCELLED AT 2021-06-16T23:24:42 DUE TO TIME LIMIT ***
