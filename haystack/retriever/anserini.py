@@ -85,7 +85,6 @@ class AnseriniRetriever(BaseRetriever, ABC):
             results.append(Document(id=hit.docid, score=hit.score, text=doc.raw()))
         return results
 
-"""
 class DenseAnseriniRetriever(AnseriniRetriever):
     
     def __init__(self,
@@ -96,7 +95,7 @@ class DenseAnseriniRetriever(AnseriniRetriever):
                  huggingface_dataset: Dataset = None,
                  huggingface_dataset_converter: Callable = None,
                  ):
-        
+        """
         By default, this retriever was designed to do Dense Passage Retrieval.
 
         @param prebuilt_index_name: str
@@ -104,7 +103,7 @@ class DenseAnseriniRetriever(AnseriniRetriever):
             please call pyserini.dsearch.SimpleDenseSearcher.list_prebuilt_indexes() or search on Google.
         @param num_threads: int
             Indexing Anserini allows for multithreading
-        
+        """
         logger.info(f'{self.__class__.__name__}')
         self.num_threads = num_threads
 
@@ -120,13 +119,14 @@ class DenseAnseriniRetriever(AnseriniRetriever):
             raise ValueError('Please provide either a prebuilt_index_name or huggingface_dataset.')
 
         self.top_k = top_k
-"""
+
 
 class SparseAnseriniRetriever(AnseriniRetriever):
     def __init__(self,
                  searcher_config: Dict[str, dict],
                  top_k: int = 1000,
                  prebuilt_index_name: str = None,
+                 index_path: str = None,
                  huggingface_dataset: Dataset = None,
                  huggingface_dataset_converter: Callable = None,
                  num_threads: int = 3,
@@ -148,11 +148,13 @@ class SparseAnseriniRetriever(AnseriniRetriever):
         self.num_threads = num_threads
         if prebuilt_index_name is not None:
             self.searcher = SimpleSearcher.from_prebuilt_index(prebuilt_index_name)
+        elif index_path is not None:
+            self.searcher = SimpleSearcher(index_dir=index_path)
         elif huggingface_dataset is not None:
             self.index_path = self._build_index_using_huggingface(huggingface_dataset, huggingface_dataset_converter)
-            self.searcher = SimpleSearcher(self.index_path)
+            self.searcher = SimpleSearcher(index_dir=self.index_path)
         else:
-            raise ValueError('Please provide either a prebuilt_index_name or huggingface_dataset.')
+            raise ValueError('Please provide either a prebuilt_index_name, index_path or huggingface_dataset.')
 
         for key, params in searcher_config.items():
             if key == 'Dirichlet':
