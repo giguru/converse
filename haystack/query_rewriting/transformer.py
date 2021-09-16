@@ -101,8 +101,6 @@ class GenerativeReformulator(BaseReformulator):
 
         Combinations that can be used are:
         - pretrained_model_path='castorini/t5-base-canard',
-          transformer_class=T5ForConditionalGeneration,
-          tokenizer_class=T5Tokenizer
 
         @param pretrained_model_path:
         @param max_length:

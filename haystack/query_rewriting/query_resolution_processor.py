@@ -1,10 +1,8 @@
 import os
 import logging
-
 import datasets
 # Use external dependency Spacy, because QuReTec also uses Spacy
 import spacy
-from farm.evaluation.metrics import register_metrics
 from farm.data_handler.processor import Processor
 from farm.data_handler.samples import Sample
 from farm.evaluation.metrics import register_metrics

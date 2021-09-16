@@ -11,6 +11,12 @@ class BaseReformulator(BaseComponent):
     reformulate_time = 0.0
 
     def __init__(self, use_gpu: bool = True, debug: bool = True):
+        """
+        :param use_gpu:
+            Set True if the component needs to use the GPU if available.
+        :param debug:
+            Set True if the component needs to log its output.
+        """
         self.debug = debug
         self.log: List = []
         self.use_gpu = use_gpu
