@@ -2,7 +2,7 @@ import logging
 import sys
 import datasets
 from haystack import Pipeline
-from haystack.eval import EvalDocuments
+from haystack.eval import EvalTREC
 from haystack.query_rewriting.transformer import ClassificationReformulator
 from haystack.ranker import FARMRanker
 from haystack.retriever.anserini import SparseAnseriniRetriever
@@ -18,9 +18,9 @@ topics = [topic for qid, topic in enumerate(topics)]
 # Load pipeline elements
 reformulator = ClassificationReformulator(pretrained_model_path="uva-irlab/quretec")
 retriever = SparseAnseriniRetriever(prebuilt_index_name='cast2019', searcher_config={"Dirichlet": {'mu': 2500}})
-eval_retriever = EvalDocuments(top_k_eval_documents=1000, open_domain=False)
+eval_retriever = EvalTREC(top_k_eval_documents=1000)
 ranker = FARMRanker(model_name_or_path="castorini/monobert-large-msmarco-finetune-only", top_k=1000, progress_bar=False)
-eval_reranker = EvalDocuments(top_k_eval_documents=1000, open_domain=False)
+eval_reranker = EvalTREC(top_k_eval_documents=1000)
 
 # Build pipeline
 p = Pipeline()
