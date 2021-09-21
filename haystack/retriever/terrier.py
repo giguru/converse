@@ -13,14 +13,17 @@ log = logging.getLogger(__name__)
 
 class TerrierRetriever(BaseRetriever):
     def __init__(self,
-                 config_json: dict,
                  top_k: int,
-                 document_store = None,
-                 prebuilt_index_name: str = None,
-                 huggingface_dataset: Dataset = None,
-                 huggingface_dataset_converter = None,
+                 searcher_args: dict,
                  indexer_args: dict = None,
                  indexer_class = None,
+                 document_store = None,
+                 prebuilt_index_name: str = None,
+                 index_path: str = None,
+                 huggingface_dataset: Dataset = None,
+                 huggingface_dataset_converter = None,
+                 max_doc_id_len: int = 50,
+                 max_text_len: int = 4096,
                  ):
         """
         @type prebuilt_index_name: str
@@ -35,16 +38,16 @@ class TerrierRetriever(BaseRetriever):
         self.top_k = top_k
         self._indexer_args = indexer_args or {'type': pt.IndexingType.CLASSIC, 'overwrite': False}
         self._indexer_class = indexer_class or pt.IterDictIndexer
-        self.MAX_DOC_ID_LEN = 50
-        self.MAX_TEXT_LEN = 4096
+        self.MAX_DOC_ID_LEN = max_doc_id_len
+        self.MAX_TEXT_LEN = max_text_len
 
-        if document_store is None and prebuilt_index_name is None and huggingface_dataset is None:
-            raise KeyError(f"Please provide either a `document_store`, `prebuilt_index_name` or `huggingface_dataset`. "
+        if document_store is None and prebuilt_index_name is None and huggingface_dataset is None and index_path is None:
+            raise KeyError(f"Please provide either a `document_store`, `index_path`, `prebuilt_index_name` or `huggingface_dataset`. "
                            f"A possible pt_datasets is e.g. 'trec-deep-learning-passages'. "
                            f"The following datasets are included in Terrier: {pt.list_datasets()}")
 
-        self.config = config_json
-        if 'wmodel' in config_json:
+        self.config = searcher_args
+        if 'wmodel' in searcher_args:
             self.wmodel = self.config["wmodel"]
         else:
             raise KeyError('The config should contain a "wmodel" key. Amongst the possible values are: TF_IDF, BM25,'
@@ -58,19 +61,21 @@ class TerrierRetriever(BaseRetriever):
         self.huggingface_dataset = None
 
         if huggingface_dataset is not None:
-            self.index_path = self.config.get("index_path", './huggingface_' + huggingface_dataset.info.builder_name)
+            self.index_path = index_path or self.config.get("index_path", './huggingface_' + huggingface_dataset.info.builder_name)
             self.huggingface_dataset = huggingface_dataset
             self._huggingface_dataset_converter = huggingface_dataset_converter
             self._build_index_using_huggingface_dataset()
         elif prebuilt_index_name is not None:
-            self.index_path = self.config.get("index_path", './terrier_' + prebuilt_index_name)
+            self.index_path = index_path or self.config.get("index_path", './terrier_' + prebuilt_index_name)
             self.pt_dataset = pt.get_dataset(prebuilt_index_name)
             self._build_index_using_pt_dataset()
         elif document_store is not None:
-            self.index_path = self.config.get("index_path", './terrier_indexed')
+            self.index_path = index_path or self.config.get("index_path", './terrier_indexed')
             self.document_store = document_store
             self._build_index_using_document_store()
-        log.info(f"{self.__class__.__name__} with config={config_json}")
+        elif 'index_path' in self.config.keys() or index_path:
+            self.index_path = index_path or self.config.get("index_path")
+        log.info(f"{self.__class__.__name__} with config={searcher_args}")
 
     def _clean_text(self, text):
         """
