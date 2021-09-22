@@ -20,7 +20,7 @@ class CustomFilterReformulator(BaseReformulator):
         self._filter_func = filter_func
 
     def run_query(self, query: str, history: Union[str, List[str]], **kwargs):
-        extended_query = self._filter_func(query, history)
+        extended_query = self._filter_func(query=query, history=history)
         if not isinstance(extended_query, str):
             raise ValueError("The filter function of the CustomFilterReformulator should return a string.")
 
@@ -28,7 +28,7 @@ class CustomFilterReformulator(BaseReformulator):
             **kwargs,
             'query': extended_query,
             'original_query': query,
-        }
+        }, "output_1"
 
 
 class ConcatenationReformulator(BaseReformulator):
@@ -51,7 +51,7 @@ class ConcatenationReformulator(BaseReformulator):
             **kwargs,
             'query': extended_query,
             'original_query': query,
-        }
+        }, "output_1"
 
 
 class PrependingReformulator(BaseReformulator):
@@ -91,4 +91,4 @@ class PrependingReformulator(BaseReformulator):
             **kwargs,
             'query': extended_query,
             'original_query': query,
-        }
+        }, "output_1"
