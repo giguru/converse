@@ -41,3 +41,4 @@ pytrec-eval>=0.5
 pyserini==0.13.0
 # Optional: For TerrierRetriever
 python-terrier
+datasets
