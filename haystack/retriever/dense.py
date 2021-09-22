@@ -50,7 +50,8 @@ class DensePassageRetriever(BaseRetriever):
                  use_fast_tokenizers: bool = True,
                  infer_tokenizer_classes: bool = False,
                  similarity_function: str = "dot_product",
-                 progress_bar: bool = True
+                 progress_bar: bool = True,
+                 debug: bool = True
                  ):
         """
         Init the Retriever incl. the two encoder models from a local or remote model checkpoint.
@@ -96,7 +97,7 @@ class DensePassageRetriever(BaseRetriever):
         :param progress_bar: Whether to show a tqdm progress bar or not.
                              Can be helpful to disable in production deployments to keep the logs clean.
         """
-
+        super().__init__(debug=debug)
         # save init parameters to enable export of component config as YAML
         self.set_config(
             document_store=document_store, query_embedding_model=query_embedding_model,

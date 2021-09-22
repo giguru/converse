@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 class ElasticsearchRetriever(BaseRetriever):
-    def __init__(self, document_store: ElasticsearchDocumentStore, top_k: int = 10, custom_query: str = None):
+    def __init__(self, document_store: ElasticsearchDocumentStore, top_k: int = 10, custom_query: str = None, debug: bool = True):
         """
         :param document_store: an instance of a DocumentStore to retrieve documents from.
         :param custom_query: query string as per Elasticsearch DSL with a mandatory query placeholder(query).
@@ -52,7 +52,7 @@ class ElasticsearchRetriever(BaseRetriever):
                             ```
         :param top_k: How many documents to return per query.
         """
-
+        super().__init__(debug=debug)
         # save init parameters to enable export of component config as YAML
         self.set_config(document_store=document_store, top_k=top_k, custom_query=custom_query)
 
@@ -117,12 +117,12 @@ class TfidfRetriever(BaseRetriever):
     It uses sklearn's TfidfVectorizer to compute a tf-idf matrix.
     """
 
-    def __init__(self, document_store: BaseDocumentStore, top_k: int = 10):
+    def __init__(self, document_store: BaseDocumentStore, top_k: int = 10, debug: bool = True):
         """
         :param document_store: an instance of a DocumentStore to retrieve documents from.
         :param top_k: How many documents to return per query.
         """
-
+        super().__init__(debug=debug)
         # save init parameters to enable export of component config as YAML
         self.set_config(document_store=document_store, top_k=top_k)
 

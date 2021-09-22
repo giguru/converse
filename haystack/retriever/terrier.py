@@ -1,6 +1,6 @@
 import logging
 import re
-from typing import List, Tuple
+from typing import List, Tuple, Callable
 import os
 import pyterrier as pt
 from datasets import Dataset
@@ -21,9 +21,10 @@ class TerrierRetriever(BaseRetriever):
                  prebuilt_index_name: str = None,
                  index_path: str = None,
                  huggingface_dataset: Dataset = None,
-                 huggingface_dataset_converter = None,
+                 huggingface_dataset_converter: Callable = None,
                  max_doc_id_len: int = 50,
                  max_text_len: int = 4096,
+                 debug: bool = True
                  ):
         """
         @type prebuilt_index_name: str
@@ -33,7 +34,7 @@ class TerrierRetriever(BaseRetriever):
             Any Haystack document store.
         @type top_k: int
         """
-        super().__init__()
+        super().__init__(debug=debug)
 
         self.top_k = top_k
         self._indexer_args = indexer_args or {'type': pt.IndexingType.CLASSIC, 'overwrite': False}

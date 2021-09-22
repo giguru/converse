@@ -20,6 +20,14 @@ class BaseRetriever(BaseComponent):
     index_time = 0.0
     retrieve_time = 0.0
 
+    def __init__(self, debug: bool = True):
+        """
+        :param debug:
+            Set True if the component needs to log its output.
+        """
+        self.debug = debug
+        self.log: List = []
+
     @abstractmethod
     def retrieve(self, query: str, filters: dict = None, top_k: Optional[int] = None, index: str = None) -> List[Document]:
         """
@@ -185,6 +193,8 @@ class BaseRetriever(BaseComponent):
             output, stream = run_indexing(**kwargs)
         else:
             raise Exception(f"Invalid pipeline_type '{pipeline_type}'.")
+        if self.debug:
+            self.log.append(output)
         return output, stream
 
     def run_query(
@@ -232,3 +242,13 @@ class BaseRetriever(BaseComponent):
             print(f"Query time: {self.query_time}s")
             print(f"{self.query_time / self.query_count} seconds per query")
         print("\n")
+
+    def print(self):
+        print("\nRetriever Log")
+        print("---------------")
+        for output in self.log:
+            print({
+                'query': output['query'],
+                'qid': output['qid'] if 'qid' in output else '',
+                'documents': output['documents'],
+            })
