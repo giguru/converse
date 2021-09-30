@@ -365,16 +365,32 @@ class QuretecProcessor(Processor):
         }]
 
     def predictions_to_terms(self, batch: dict, predictions: List[List[str]]):
-        input_ids = batch['input_ids']
-        relevant_inputs = [input_ids[i][batch['label_attention_mask'][i] == 1].tolist() for i in range(len(input_ids))]
+        input_ids, mask, valid = batch['input_ids'], batch['label_attention_mask'], batch['valid_ids']
 
-        terms = []
-        for b in range(len(relevant_inputs)):
-            assert len(relevant_inputs[b]) == len(predictions[b])
+        terms = []  # type: List[List[str]]
+        positions = []
+        for b in range(len(input_ids)):
+            relevant_filter = mask[b] == 1  # type: List[bool]
+            relevant_inputs = input_ids[b][relevant_filter].tolist()
+            assert len(relevant_inputs) == len(predictions[b])
+
             terms.append([])
-            for i in range(len(predictions[b])):
-                # TODO take valid ids into account
-                if predictions[b][i] == self.labels['RELEVANT']:
-                    terms[b].append(relevant_inputs[b][i])
-        return [self.tokenizer.convert_ids_to_tokens(terms[i]) for i in range(len(terms))]
+            positions.append([])
+            p = 0
+            current = self.tokenizer.convert_ids_to_tokens(input_ids[b].tolist())
+            for t, token in enumerate(current):
+                if relevant_filter[t]:
+                    if predictions[b][p] == self.labels['RELEVANT'] and valid[b][t] == 1:
+                        terms[b].append(token)
+
+                        # BERT break up some words, e.g. 'Neverending' becomes 'never' and '##ending'.
+                        # Merge those word parts together again by looping forward.
+                        for f in range(t+1, len(current)):
+                            next_term = current[f]  # type: str
+                            if next_term.startswith('##'):
+                                terms[b][-1] += next_term.replace('##', '')
+                            else:
+                                break
+                    p += 1
+        return terms
 

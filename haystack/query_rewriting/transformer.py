@@ -1,5 +1,4 @@
-import logging
-import torch
+import logging, torch, re
 from typing import Any, List, Union, Callable
 
 from farm.data_handler.processor import Processor
@@ -48,6 +47,7 @@ class ClassificationReformulator(BaseReformulator):
                                                               **model_args)
             self.processor = processor or QuretecProcessor(tokenizer=self.tokenizer, max_seq_len=300)
         else:
+
             self.model = AutoModelForTokenClassification(pretrained_model_path, config=config, device=self.device,
                                                          **model_args)
             self.processor = processor
@@ -56,27 +56,46 @@ class ClassificationReformulator(BaseReformulator):
         if self.processor is not None and not self.processor.tokenizer:
             self.processor.tokenizer = self.tokenizer
 
+    def _filter_predicted_terms(self, predicted_terms: List[str], query: str):
+        # The predicted terms can contain duplicates. Only get the distinct values
+        predicted_terms = [w.lower() for w in list(set(predicted_terms))]
+
+        # Do not append the terms that are already in the query, so filter term
+        query_words = re.split(r"[\W_]+", query)  # Get query terms by splitting on spaces and punctuation
+        query_words = [w.lower() for w in query_words]
+        return [term for term in predicted_terms if term not in query_words]
+
     def run_query(self, query, **kwargs):
-        self.model.connect_heads_with_processor(self.processor.tasks, require_labels=True)
-        dataset, tensor_names, problematic_samples = self.processor.dataset_from_dicts(
-            dicts=[{'query': query, **kwargs}])
-        data_loader = NamedDataLoader(dataset=dataset, batch_size=1, tensor_names=tensor_names)
+        history = kwargs.get('history', [])
+        if len(history) > 0:  # reformulating to include history is irrelevant when there is no history...
+            self.model.connect_heads_with_processor(self.processor.tasks, require_labels=True)
+            dataset, tensor_names, problematic_samples = self.processor.dataset_from_dicts(
+                dicts=[{'query': query, **kwargs}])
+            data_loader = NamedDataLoader(dataset=dataset, batch_size=1, tensor_names=tensor_names)
+            for step, batch in enumerate(data_loader):
+                batch = {key: batch[key].to(self.device) for key in batch}
+                with torch.no_grad():
+                    logits = self.model.forward(**batch)
 
-        for step, batch in enumerate(data_loader):
-            batch = {key: batch[key].to(self.device) for key in batch}
-            with torch.no_grad():
-                logits = self.model.forward(**batch)
-                preds_per_head = self.model.logits_to_preds(logits=logits, **batch)
-                # Right now, only one prediction head is supported
-                predicted_terms = self.processor.predictions_to_terms(batch=batch, predictions=preds_per_head[0])[0]
+                    # Check if the processor has a logits_to_terms function.
+                    if callable(getattr(self.processor, 'logits_to_terms', None)):
+                        predicted_terms = self.processor.logits_to_terms(logits=logits, batch=batch)
+                    else:  # This assumes the QuReTEcProcesssor and QuretecModel
+                        preds_per_head = self.model.logits_to_preds(logits=logits, **batch)
+                        # Right now, only one prediction head is supported
+                        predicted_terms = self.processor.predictions_to_terms(batch=batch, predictions=preds_per_head[0])[0]
 
-                # The predicted terms can contain duplicates. Only get the distinct values
-                predicted_terms = list(set(predicted_terms))
-            extended_query = f"{query} {' '.join(predicted_terms)}"
+                predicted_terms = self._filter_predicted_terms(predicted_terms, query)
+                output = {
+                    **kwargs,
+                    'original_query': query,
+                    'query': f"{query} {' '.join(predicted_terms)}" if len(predicted_terms) > 0 else query
+                }
+        else:
             output = {
                 **kwargs,
                 'original_query': query,
-                'query': extended_query
+                'query': query
             }
         return output, "output_1"
 
