@@ -75,6 +75,6 @@ class BaseReformulator(BaseComponent):
         for output in self.log:
             print({
                 'query': output['query'],
-                'qid': output['qid'] if 'qid' in output else '',
+                'id': output['id'] if 'id' in output else '',
                 'original_query': output['original_query'],
             })
