@@ -47,9 +47,7 @@ class ClassificationReformulator(BaseReformulator):
                                                               **model_args)
             self.processor = processor or QuretecProcessor(tokenizer=self.tokenizer, max_seq_len=300)
         else:
-
-            self.model = AutoModelForTokenClassification(pretrained_model_path, config=config, device=self.device,
-                                                         **model_args)
+            self.model = AutoModelForTokenClassification(pretrained_model_path, **model_args)
             self.processor = processor
         self.model = self.model.to(self.device)
 
