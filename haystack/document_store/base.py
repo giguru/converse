@@ -190,6 +190,7 @@ class BaseDocumentStore(BaseComponent):
                            filters: Optional[Optional[Dict[str, List[str]]]] = None,
                            top_k: int = 10,
                            index: Optional[str] = None,
+                           binary: Optional[bool] = False,
                            return_embedding: Optional[bool] = None) -> List[Document]:
         pass
 

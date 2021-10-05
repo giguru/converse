@@ -393,7 +393,8 @@ class FAISSDocumentStore(SQLDocumentStore):
         filters: Optional[Dict[str, List[str]]] = None,
         top_k: int = 10,
         index: Optional[str] = None,
-        return_embedding: Optional[bool] = None
+        return_embedding: Optional[bool] = None,
+        binary: bool = False
     ) -> List[Document]:
         """
         Find the document that is most similar to the provided `query_emb` by using a vector similarity metric.
@@ -416,19 +417,49 @@ class FAISSDocumentStore(SQLDocumentStore):
         if return_embedding is None:
             return_embedding = self.return_embedding
 
-        query_emb = query_emb.reshape(1, -1).astype(np.float32)
-        score_matrix, vector_id_matrix = self.faiss_indexes[index].search(query_emb, top_k)
-        vector_ids_for_query = [str(vector_id) for vector_id in vector_id_matrix[0] if vector_id != -1]
+        if binary:  # Support for BinaryPassageRetriever. Copied from the original repository
+            query_embeddings = np.array(query_emb)
+            num_queries = query_embeddings.shape[0]
+            bin_query_embeddings = np.packbits(np.where(query_emb > 0, 1, 0)).reshape(num_queries, -1)
+            raw_index = self.faiss_indexes[index].index
+            _, ids_arr = self.faiss_indexes[index].search(bin_query_embeddings, top_k)
+            passage_embeddings = np.vstack(
+                [np.unpackbits(raw_index.reconstruct(int(id_))) for id_ in ids_arr.reshape(-1)]
+            )
+            passage_embeddings = passage_embeddings.reshape(
+                query_embeddings.shape[0], top_k, query_embeddings.shape[1]
+            )
+            passage_embeddings = passage_embeddings.astype(np.float32)
 
-        documents = self.get_documents_by_vector_ids(vector_ids_for_query, index=index)
+            passage_embeddings = passage_embeddings * 2 - 1
+            scores_arr = np.einsum("ijk,ik->ij", passage_embeddings, query_embeddings)
+            sorted_indices = np.argsort(-scores_arr, axis=1)
 
-        #assign query score to each document
-        scores_for_vector_ids: Dict[str, float] = {str(v_id): s for v_id, s in zip(vector_id_matrix[0], score_matrix[0])}
-        for doc in documents:
-            doc.score = scores_for_vector_ids[doc.meta["vector_id"]]
-            doc.probability = float(expit(np.asarray(doc.score / 100)))
-            if return_embedding is True:
-                doc.embedding = self.faiss_indexes[index].reconstruct(int(doc.meta["vector_id"]))
+            ids_arr = ids_arr[np.arange(num_queries)[:, None], sorted_indices]
+            ids_arr = np.array([self.faiss_indexes[index].id_map.at(int(id_)) for id_ in ids_arr.reshape(-1)], dtype=np.int)
+            ids_arr = ids_arr.reshape(num_queries, -1)
+
+            scores_arr = scores_arr[np.arange(num_queries)[:, None], sorted_indices]
+
+            # The first zero-th index, because there is only one query
+            return [Document(id=id_,
+                             score=float(score),
+                             # TODO get the original text
+                             text="") for score, id_ in zip(scores_arr[0, :top_k], ids_arr[0, :top_k])]
+        else:
+            query_emb = query_emb.reshape(1, -1).astype(np.float32)
+            score_matrix, vector_id_matrix = self.faiss_indexes[index].search(query_emb, top_k)
+            vector_ids_for_query = [str(vector_id) for vector_id in vector_id_matrix[0] if vector_id != -1]
+
+            documents = self.get_documents_by_vector_ids(vector_ids_for_query, index=index)
+
+            #assign query score to each document
+            scores_for_vector_ids: Dict[str, float] = {str(v_id): s for v_id, s in zip(vector_id_matrix[0], score_matrix[0])}
+            for doc in documents:
+                doc.score = scores_for_vector_ids[doc.meta["vector_id"]]
+                doc.probability = float(expit(np.asarray(doc.score / 100)))
+                if return_embedding is True:
+                    doc.embedding = self.faiss_indexes[index].reconstruct(int(doc.meta["vector_id"]))
 
         return documents
 
@@ -447,6 +478,7 @@ class FAISSDocumentStore(SQLDocumentStore):
         faiss_file_path: Union[str, Path],
         sql_url: str,
         index: str,
+        binary: bool = False,
     ):
         """
         Load a saved FAISS index from a file and connect to the SQL database.
@@ -461,7 +493,12 @@ class FAISSDocumentStore(SQLDocumentStore):
         """
         """
         """
-        faiss_index = faiss.read_index(str(faiss_file_path))
+        str_path = str(faiss_file_path)
+        if binary:
+            faiss_index = faiss.read_index_binary(str_path)
+        else:
+            faiss_index = faiss.read_index(str_path)
+
         return cls(
             faiss_index=faiss_index,
             sql_url=sql_url,
