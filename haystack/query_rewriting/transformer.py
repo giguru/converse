@@ -89,13 +89,14 @@ class ClassificationReformulator(BaseReformulator):
                     'original_query': query,
                     'query': f"{query} {' '.join(predicted_terms)}" if len(predicted_terms) > 0 else query
                 }
+                return output, "output_1"
         else:
             output = {
                 **kwargs,
                 'original_query': query,
                 'query': query
             }
-        return output, "output_1"
+            return output, "output_1"
 
 
 class GenerativeReformulator(BaseReformulator):
