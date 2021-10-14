@@ -1,6 +1,8 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 from typing import List, Dict, Callable
 from datasets import Dataset
+from pyserini.dsearch import BinaryDenseSearcher, SimpleDenseSearcher
+from pyserini.dsearch.__main__ import init_query_encoder
 from pyserini.search import SimpleSearcher
 from haystack import Document
 from haystack.retriever.base import BaseRetriever
@@ -8,15 +10,17 @@ import logging
 import os
 import json
 
+from haystack.utils import get_device
+
 logger = logging.getLogger(__name__)
 
-__all__ = ['SparseAnseriniRetriever']
+__all__ = ['SparseAnseriniRetriever', 'DenseAnseriniRetriever']
 
 
 class AnseriniRetriever(BaseRetriever, ABC):
     def _build_index_using_huggingface(self,
                                        dataset: Dataset,
-                                       converter=None,
+                                       converter: Callable = None,
                                        storeRaw: bool = True,
                                        storeVectors: bool = False,
                                        storePositions: bool = False
@@ -71,54 +75,81 @@ class AnseriniRetriever(BaseRetriever, ABC):
             os.remove(temp_jsonl_file)
         return index_path
 
+    @abstractmethod
+    def retrieve(self, **kwargs) -> List:
+        raise NotImplementedError('Please implement in your extended class')
+
+
+class DenseAnseriniRetriever(AnseriniRetriever):
+    def __init__(self,
+                 query_encoder: str = 'castorini/bpr-nq-question-encoder',
+                 top_k: int = 1000,
+                 prebuilt_index_name: str = None,
+                 index_path: str = None,
+                 num_threads: int = 3,
+                 huggingface_dataset: Dataset = None,
+                 huggingface_dataset_converter: Callable = None,
+                 debug: bool = True,
+                 binary: bool = True,
+                 use_gpu: bool = True,
+                 ):
+        """
+        By default, this retriever was designed to do Dense Passage Retrieval.
+
+        :param: prebuilt_index_name: str
+            E.g. msmarco-passage-tct_colbert-hnsw. For all available prebuilt indexes,
+            please call pyserini.dsearch.SimpleDenseSearcher.list_prebuilt_indexes() or
+            pyserini.dsearch.BinaryDenseSearcher.list_prebuilt_indexes().
+        :param: num_threads: int
+            Indexing Anserini allows for multithreading
+        """
+        super().__init__(debug=debug)
+        logger.info(f'{self.__class__.__name__}')
+        self.num_threads = num_threads
+        device = get_device(use_gpu)
+        query_encoder = init_query_encoder(query_encoder, None, None, None, device, None)
+        if prebuilt_index_name is not None:
+            if binary:
+                self.searcher = BinaryDenseSearcher.from_prebuilt_index(prebuilt_index_name, query_encoder)
+            else:
+                self.searcher = SimpleDenseSearcher.from_prebuilt_index(prebuilt_index_name, query_encoder)
+        elif index_path is not None:
+            if binary:
+                self.searcher = BinaryDenseSearcher(index_path, query_encoder)
+            else:
+                self.searcher = SimpleDenseSearcher(index_path, query_encoder)
+        elif huggingface_dataset is not None:
+            # TODO add possibility to index your own datasets as well. Right now, this is not possible, since Anserini
+            #  is currently implementing BPR and has not yet released it, so it is unclear how to build your own index.
+            raise NotImplementedError()
+            self.index_path = self._build_index_using_huggingface(huggingface_dataset, huggingface_dataset_converter)
+            if binary:
+                self.searcher = BinaryDenseSearcher(self.index_path, query_encoder)
+            else:
+                self.searcher = SimpleDenseSearcher(self.index_path, query_encoder)
+        else:
+            raise ValueError('Please provide either a prebuilt_index_name, index_path or huggingface_dataset.')
+        self.binary = binary
+        self.top_k = top_k
+
     def retrieve(self, **kwargs) -> List:
         query = kwargs.get('query', None)  # type: str
         if not query:
             raise KeyError(f'Please provide a `query`. The args are: {kwargs}')
 
         top_k = kwargs.get('top_k', None) or self.top_k  # type: int
+        if self.binary:
+            # For BinaryDenseSearcher
+            hits = self.searcher.search(query=query, binary_k=top_k, threads=self.num_threads)
+        else:
+            # For SimpleDenseSearcher
+            hits = self.searcher.search(query=query, k=top_k, threads=self.num_threads)
 
-        hits = self.searcher.search(q=query, k=top_k)
         results = []
         for hit in hits:
             doc = self.searcher.doc(hit.docid)
             results.append(Document(id=hit.docid, score=hit.score, text=doc.raw()))
         return results
-
-class DenseAnseriniRetriever(AnseriniRetriever):
-    
-    def __init__(self,
-                 query_encoder: QueryEncoder = None,
-                 top_k: int = 1000,
-                 prebuilt_index_name: str = None,
-                 num_threads: int = 3,
-                 huggingface_dataset: Dataset = None,
-                 huggingface_dataset_converter: Callable = None,
-                 ):
-        """
-        By default, this retriever was designed to do Dense Passage Retrieval.
-
-        @param prebuilt_index_name: str
-            E.g. msmarco-passage-tct_colbert-hnsw. For all available prebuilt indexes,
-            please call pyserini.dsearch.SimpleDenseSearcher.list_prebuilt_indexes() or search on Google.
-        @param num_threads: int
-            Indexing Anserini allows for multithreading
-        """
-        logger.info(f'{self.__class__.__name__}')
-        self.num_threads = num_threads
-
-        encoder = query_encoder or DprQueryEncoder(encoder_dir="facebook/dpr-question_encoder-single-nq-base")
-        if prebuilt_index_name is not None:
-            self.searcher = SimpleDenseSearcher.from_prebuilt_index(prebuilt_index_name, encoder)
-        elif huggingface_dataset is not None:
-            # TODO add possibility to index your own datasets as well.
-            raise NotImplementedError()
-            # self.index_path = self._build_index_using_huggingface(huggingface_dataset, huggingface_dataset_converter)
-            # self.searcher = SimpleDenseSearcher(self.index_path, encoder)
-        else:
-            raise ValueError('Please provide either a prebuilt_index_name or huggingface_dataset.')
-
-        self.top_k = top_k
 
 
 class SparseAnseriniRetriever(AnseriniRetriever):
@@ -130,6 +161,7 @@ class SparseAnseriniRetriever(AnseriniRetriever):
                  huggingface_dataset: Dataset = None,
                  huggingface_dataset_converter: Callable = None,
                  num_threads: int = 3,
+                 debug: bool = True
                  ):
         """
         @param prebuilt_index_name: str
@@ -138,13 +170,14 @@ class SparseAnseriniRetriever(AnseriniRetriever):
         @param huggingface_dataset: Dataset
             Please check if you need to provided a huggingface_dataset_converter as well
         @param huggingface_dataset_converter: Callable
-            The object provided to anserini for indexing requires two keys: `id` and `contents`. If the entries in the
+            The object provided to anserini for indexing requires two keys: `id` and `content`. If the entries in the
             huggingface dataset do not provide these keys, please provider a converter function:
-            e.g. lamda d: {'id': d[...], 'contents': d[...]}
+            e.g. lamda d: {'id': d[...], 'content': d[...]}
         @param num_threads: int
             Indexing anserini allows for multithreading
         """
         logger.info(f'{self.__class__.__name__} with {searcher_config}')
+        super().__init__(debug=debug)
         self.num_threads = num_threads
         if prebuilt_index_name is not None:
             self.searcher = SimpleSearcher.from_prebuilt_index(prebuilt_index_name)
@@ -169,3 +202,17 @@ class SparseAnseriniRetriever(AnseriniRetriever):
                 raise KeyError("Invalid key in `searcher_config`. The allowed keys are: Dirichlet, BM25, RM3 or a function of SimpleSearcher")
 
         self.top_k = top_k
+
+    def retrieve(self, **kwargs) -> List:
+        query = kwargs.get('query', None)  # type: str
+        if not query:
+            raise KeyError(f'Please provide a `query`. The args are: {kwargs}')
+
+        top_k = kwargs.get('top_k', None) or self.top_k  # type: int
+
+        hits = self.searcher.search(q=query, k=top_k)
+        results = []
+        for hit in hits:
+            doc = self.searcher.doc(hit.docid)
+            results.append(Document(id=hit.docid, score=hit.score, text=doc.raw()))
+        return results
