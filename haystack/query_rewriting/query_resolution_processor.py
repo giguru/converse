@@ -1,16 +1,12 @@
-import os
-import logging
-import datasets
+import os, logging, datasets, spacy, re
+from pathlib import Path
 # Use external dependency Spacy, because QuReTec also uses Spacy
-import spacy
 from farm.data_handler.processor import Processor
 from farm.data_handler.samples import Sample
 from farm.evaluation.metrics import register_metrics
 from spacy.tokens import Token
 from transformers import BertTokenizer
-from typing import List, Optional
-import re
-
+from typing import List, Optional, Tuple
 from haystack import Label
 
 logger = logging.getLogger(__name__)
@@ -111,6 +107,10 @@ class QuretecProcessor(Processor):
                     split: dict=None
                     ):
         """
+        Transfer a dataset from HuggingFace into the Processor. If you want to use your own dataset, simply set
+        the self.data_dir, self.datasets, self.train_filename, self.test_filename and/or self.dev_filename of the
+        processor instance.
+
         @param dataset_name: The processor class was designed to work with the HuggingFace dataset
                              'uva-irlab/canard_quretec'. Can be 'None' if you are using it for evaluation.
         @param split: Split dict as accepted by datasets.load_dataset from HuggingFace datasets
@@ -121,19 +121,19 @@ class QuretecProcessor(Processor):
             split = {'train': 'train', 'test': 'test', 'validation': 'validation'}
 
         loaded_datasets = datasets.load_dataset(dataset_name, split=list(split.values()))
-        self.data_dir = os.path.dirname(loaded_datasets[0].cache_files[0]['filename'])
+        self.data_dir = Path(os.path.dirname(loaded_datasets[0].cache_files[0]['filename']))
         self.datasets = {}
 
-        keys = split.keys()
+        keys = [k for k in split.keys()]
         for i in range(len(split)):
             k = keys[i]
             self.datasets[k] = loaded_datasets[i]
             if k == 'train':
-                self.train_filename = os.path.basename(self.datasets[k].cache_files[0]['filename'])
+                self.train_filename = Path(os.path.basename(self.datasets[k].cache_files[0]['filename']))
             elif k == 'test':
-                self.test_filename = os.path.basename(self.datasets[k].cache_files[0]['filename'])
+                self.test_filename = Path(os.path.basename(self.datasets[k].cache_files[0]['filename']))
             elif k == 'validation' or k == 'dev':
-                self.dev_filename = os.path.basename(self.datasets['dev'].cache_files[0]['filename'])
+                self.dev_filename = Path(os.path.basename(self.datasets['validation'].cache_files[0]['filename']))
 
     @staticmethod
     def get_labels():
@@ -153,27 +153,38 @@ class QuretecProcessor(Processor):
     def id2label():
         return {i: label for i, label in enumerate(QuretecProcessor.get_labels())}
 
-    def pad_token_id(self):
+    @staticmethod
+    def pad_token_id():
         return QuretecProcessor.get_labels().index('[PAD]')
 
     def file_to_dicts(self, file: str) -> [dict]:
-        test_filename_path = self.data_dir / self.test_filename
-        if file == test_filename_path:
-            return self.datasets['test']
+        if self.test_filename:
+            test_filename_path = self.data_dir / self.test_filename
+            if file == test_filename_path:
+                return self.datasets['test']
 
-        train_filename_path = self.data_dir / self.train_filename
-        if file == train_filename_path:
-            return self.datasets['train']
+        if self.train_filename:
+            train_filename_path = self.data_dir / self.train_filename
+            if file == train_filename_path:
+                return self.datasets['train']
 
-        dev_filename_path = self.data_dir / self.dev_filename
-        if file == dev_filename_path:
-            return self.datasets['dev']
+        if self.dev_filename:
+            dev_filename_path = self.data_dir / self.dev_filename
+            if file == dev_filename_path:
+                return self.datasets['validation']
 
         raise ValueError(f'Please use the training file {train_filename_path}\n, test file {test_filename_path} or dev file {dev_filename_path}')
 
-    def relevant_terms(self, history: str, gold_source: str):
-        word_list = re.findall(r"[\w']+|[.,!?;]", history)
-        gold_list = re.findall(r"[\w']+|[.,!?;]", gold_source)
+    def relevant_terms(self, history: str, gold_source: str) -> Tuple[List[str], List[str]]:
+        """
+        Use the gold source to label the words/terms in the the history as relevant, non-relevant.
+
+        :param history:
+        :param gold_source:
+        """
+        exp = r"[\w|\[SEP\]|\[CLS\]|\[PAD\]]+|[\"\[\].,!?:;\-\(\)]|'s"
+        word_list = re.findall(exp, history)
+        gold_list = re.findall(exp, gold_source)
         gold_lemmas = set([get_spacy_parsed_word(w).lemma_ for w in gold_list])
         label_list = []
 
@@ -183,12 +194,16 @@ class QuretecProcessor(Processor):
                     label_list.append(QuretecProcessor.labels['RELEVANT'])
                 else:
                     label_list.append(QuretecProcessor.labels['NOT_RELEVANT'])
+            elif w == '[SEP]' or w == '[CLS]':
+                label_list.append(w)
             else:
                 label_list.append(QuretecProcessor.labels['NOT_RELEVANT'])
 
         return word_list, label_list
 
     def __combine_history_and_question(self, history: str, question: str):
+        # The authors of QuReTec by Voskarides et al. decided to separate the history and the current question
+        # with a [SEP] token
         return f"{history} {self.tokenizer.sep_token} {question}"
 
     def _dict_to_samples(self, dictionary: dict, **kwargs) -> [Sample]:
@@ -198,26 +213,24 @@ class QuretecProcessor(Processor):
         """
         if 'cur_question' not in dictionary and 'query' not in dictionary:
             raise KeyError(f'Please provide a `query` or `cur_question` key for the dict: {dictionary}')
-        question = dictionary.get('cur_question', dictionary['query']).lower()
+        question = dictionary.get('cur_question', dictionary.get('query')).lower()
 
         if 'prev_questions' not in dictionary and 'history' not in dictionary:
             raise KeyError(f'Please provide a `history` or `prev_questions` key for the dict: {dictionary}')
 
-        history = dictionary.get('prev_questions', dictionary['history'])
+        history = dictionary.get('prev_questions', dictionary.get('history'))
         history = " ".join(history) if isinstance(history, list) else history
         history = history.lower()
 
-        gold_terms = dictionary.get('gold_terms', "")  # type: str
-
-        # The authors of QuReTec by Voskarides et al. decided to separate the history and the current question
-        # with a SEP token
         tokenized_text = self.__combine_history_and_question(history=history, question=question)
 
-        # TODO add ability to use another data set than the preprocessed one of Voskarides
+        # The HuggingFace dataset uva-irlab/canard_quretec is preprocessed by Voskarides et al. and contains a
+        # word and label list.
         if 'bert_ner_overlap' in dictionary:
-            word_list = dictionary['bert_ner_overlap'][0]
-            label_list = dictionary['bert_ner_overlap'][1]
+            word_list = dictionary.get('bert_ner_overlap')[0]
+            label_list = dictionary.get('bert_ner_overlap')[1]
         else:
+            gold_terms = dictionary.get('gold_terms', "")  # type: str
             word_list, label_list = self.relevant_terms(history=tokenized_text, gold_source=gold_terms)
 
         tokenized = self._quretec_tokenize_with_metadata(words_list=word_list, labellist=label_list)
@@ -230,7 +243,6 @@ class QuretecProcessor(Processor):
                    clear_text={
                        QuretecProcessor.label_name_key: question,
                        'tokenized_text': tokenized_text,
-                       QuretecProcessor.gold_terms: gold_terms,
                    },
                    tokenized=tokenized)
         ]
@@ -241,8 +253,10 @@ class QuretecProcessor(Processor):
 
     def _quretec_tokenize_with_metadata(self, words_list: List[str], labellist: List[str]):
         """
+
         :param: text
-            The entire text without a initial [CLS] and closing [SEP] token. E.g. "Who are you? [SEP] I am your father"
+            The entire text without a initial [CLS] and without closing [SEP] token.
+            E.g. "Who are you? [SEP] I am your father"
         """
         tokens, labels, valid, label_mask = [], [], [], []
 
@@ -365,7 +379,9 @@ class QuretecProcessor(Processor):
         }]
 
     def predictions_to_terms(self, batch: dict, predictions: List[List[str]]):
-        input_ids, mask, valid = batch['input_ids'], batch['label_attention_mask'], batch['valid_ids']
+        input_ids = batch['input_ids']
+        mask = batch['label_attention_mask']
+        valid = batch['valid_ids']  # valid_ids has ones for each start of a word.
 
         terms = []  # type: List[List[str]]
         positions = []
