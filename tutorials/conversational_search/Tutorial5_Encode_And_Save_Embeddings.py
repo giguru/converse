@@ -3,13 +3,22 @@ from haystack import Document
 from haystack.document_store import FAISSDocumentStore
 from haystack.retriever import DensePassageRetriever
 from tqdm import tqdm
-import json
+import bz2, _pickle as cPickle, logging
 
-collection = load_dataset('uva-irlab/trec-cast-2019-multi-turn', 'test_collection', split="test")
+logger = logging.getLogger(__name__)
 
-document_store = FAISSDocumentStore()
-# LOAD COMPONENTS
-retriever = DensePassageRetriever(document_store=document_store,
+
+def compressed_pickle(title, data):
+    with bz2.BZ2File(title + '.pbz2', 'w') as f:
+        cPickle.dump(data, f)
+
+
+def decompress_pickle(file):
+    return cPickle.loads(bz2.BZ2File(file, 'rb').read())
+
+
+# Load the component, in this case a retriever, with the model to embed the passages with
+retriever = DensePassageRetriever(document_store=FAISSDocumentStore(),
                                   query_embedding_model="facebook/dpr-question_encoder-single-nq-base",
                                   passage_embedding_model="facebook/dpr-ctx_encoder-single-nq-base",
                                   max_seq_len_query=64,
@@ -20,12 +29,14 @@ retriever = DensePassageRetriever(document_store=document_store,
                                   progress_bar=False,
                                   use_fast_tokenizers=False)
 
-# Process embeddings in batches
-batch_size = 100000
-M = 1000000
-embeddings = {}
-for i in tqdm(range(20 * M, collection.num_rows, batch_size)):
-    dictionary = collection[i:i + batch_size]
+collection = load_dataset('uva-irlab/trec-cast-2019-multi-turn', 'test_collection', split="test")
+TOTAL = collection.num_rows
+START = 0
+BATCH_SIZE = 10000
+
+# Process embeddings in batches without storing them in the document store first
+for i in tqdm(range(START, TOTAL, BATCH_SIZE)):
+    dictionary = collection[i:i + BATCH_SIZE]
     document_objects = []
     n = len(dictionary['docno'])
     for j in range(n):
@@ -36,9 +47,11 @@ for i in tqdm(range(20 * M, collection.num_rows, batch_size)):
 
     batch_embeddings = list(retriever.embed_passages(document_objects))
 
-    filename = f'data-{i}-{i+n}.txt'
-    with open(filename, 'w') as fp:
-        for j in range(n):
-            doc_no = dictionary['docno'][j]
-            emb = [str(x) for x in list(batch_embeddings[j])[:256]]
-            fp.write(f"{doc_no} {' '.join(emb)}\n")
+    filename = f'data-{i}-{i+n}'
+    logger.info(f"Writing data starting on {filename} with doc_id={dictionary['docno'][0]}")
+    data = {}
+    for j in range(n):
+        doc_no = dictionary['docno'][j]
+        data[doc_no] = [float(v) for v in list(batch_embeddings[j])]
+
+    compressed_pickle(filename, data)

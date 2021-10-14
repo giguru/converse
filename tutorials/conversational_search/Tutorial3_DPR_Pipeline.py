@@ -1,16 +1,15 @@
 from datasets import load_dataset
-from haystack import Pipeline, Document
+from haystack import Pipeline
 from haystack.document_store import FAISSDocumentStore
 from haystack.eval import EvalTREC
 from haystack.retriever import DensePassageRetriever
 from haystack.query_rewriting.transformer import GenerativeReformulator
-from tqdm import tqdm
 
 
 # LOAD DATASET
 topics = load_dataset('uva-irlab/trec-cast-2019-multi-turn', 'topics', split="test")
 qrels = load_dataset('uva-irlab/trec-cast-2019-multi-turn', 'qrels', split="test")
-collection = load_dataset('uva-irlab/trec-cast-2019-multi-turn', 'test_collection', split="test")
+collection = load_dataset('uva-irlab/trec-cast-2019-multi-turn', 'test_collection_sample', split="test")
 
 # convert data into the right format
 qrels = {d['qid']: {d['qrels']['docno'][i]: d['qrels']['relevance'][i] for i in range(len(d['qrels']['docno']))} for d in qrels}
@@ -29,19 +28,15 @@ retriever = DensePassageRetriever(document_store=document_store,
                                   embed_title=False,
                                   use_fast_tokenizers=False,
                                   )
-
-for i in tqdm(range(0, len(collection.num_rows), 1000)):
-    document_objects = [Document.from_dict(d) if isinstance(d, dict) else d for d in collection[i:i+1000]]
-    print(retriever.embed_passages(document_objects))
-    exit()
-
 # Important:
 # Now that after we have the DPR initialized, we need to call update_embeddings() to iterate over all
 # previously indexed documents and update their embedding representation.
 # While this can be a time consuming operation (depending on corpus size), it only needs to be done once.
 # At query time, we only need to embed the query and compare it the existing doc embeddings which is very fast.
+# However, the size of the embedding index is HUGE. I recommend using the DenseAnseriniRetriever with binary models.
+# It reduces the index size of the Natural Questions dataset from 62GB to 2GB. Pretty awesome...
 document_store.update_embeddings(retriever, batch_size=1000)
-document_store.save("faiss-trec-cast-2019-multi-turn-dpr")
+document_store.save('faiss-index.idx')
 
 eval_retriever = EvalTREC(top_k_eval_documents=1000)
 

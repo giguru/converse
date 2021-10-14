@@ -1,11 +1,12 @@
-import logging
-import sys
-import datasets
+import datasets, os
 from haystack import Pipeline
 from haystack.eval import EvalTREC
 from haystack.query_rewriting.transformer import ClassificationReformulator
 from haystack.ranker import FARMRanker
 from haystack.retriever.anserini import SparseAnseriniRetriever
+
+# Avoid forking processes by HuggingFace
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 # Load data sets
 topics = datasets.load_dataset('uva-irlab/trec-cast-2019-multi-turn', 'topics', split="test")
@@ -13,7 +14,7 @@ qrels = datasets.load_dataset('uva-irlab/trec-cast-2019-multi-turn', 'qrels', sp
 
 # Convert into the right data format
 qrels = {d['qid']: {d['qrels']['docno'][i]: d['qrels']['relevance'][i] for i in range(len(d['qrels']['docno']))} for d in qrels}
-topics = [topic for qid, topic in enumerate(topics)]
+topics = [topic for qid, topic in enumerate(topics) if qid != 147]
 
 # Load pipeline elements
 reformulator = ClassificationReformulator(pretrained_model_path="uva-irlab/quretec")
