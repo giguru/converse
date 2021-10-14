@@ -1,17 +1,12 @@
-import json
-import re
+import json, re, torch, logging
 from typing import List
-
-import torch
-import logging
-from tqdm import tqdm
 from pathlib import Path
 
 from farm.data_handler.dataloader import NamedDataLoader
 from farm.data_handler.processor import Processor
 from farm.eval import Evaluator
 from farm.modeling.prediction_head import TokenClassificationHead
-from farm.train import Trainer
+from farm.train import Trainer, EarlyStopping
 from torch import nn
 from farm.modeling.tokenization import Tokenizer
 from transformers import BertForTokenClassification, BertConfig
@@ -257,7 +252,7 @@ class QueryResolution(BaseComponent):
         :param: n_epochs: int
             Default value is 3, because Voskarides et al. their QuReTec model was trained in 3 epochs.
         """
-        logger.info(f'Training {self.__class__.__name} with batch_size={batch_size}, gradient_clipping={gradient_clipping}, '
+        logger.info(f'Training {self.__class__.__name__} with batch_size={batch_size}, gradient_clipping={gradient_clipping}, '
                     f'epsilon={epsilon}, n_gpu={self.n_gpu}, grad_acc_steps={grad_acc_steps}, evaluate_every={evaluate_every}, '
                     f'early_stopping={early_stopping}')
         if datasilo_args is None:
@@ -295,7 +290,7 @@ class QueryResolution(BaseComponent):
             grad_acc_steps=grad_acc_steps,
             device=self.device,
             max_grad_norm=1.0,
-            log_loss_every=1
+            early_stopping=EarlyStopping(metric="micro_f1", mode="max")
         )
         trainer.train()
 
